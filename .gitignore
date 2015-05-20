@@ -4,3 +4,4 @@
 *.jar
 /dist/
 /build/
+/nbproject/private/
