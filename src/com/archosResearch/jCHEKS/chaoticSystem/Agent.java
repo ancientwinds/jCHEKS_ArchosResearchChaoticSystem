@@ -109,8 +109,12 @@ public class Agent {
         
         this.pendingImpacts = tempImpacts;
         
-        if (this.keyPart > Byte.MAX_VALUE) {this.keyPart = Byte.MIN_VALUE;}
-        if (this.keyPart < Byte.MIN_VALUE) {this.keyPart = Byte.MAX_VALUE;}
+        if (this.keyPart > Byte.MAX_VALUE) {
+            this.keyPart = Byte.MIN_VALUE + ((this.keyPart) % 255);
+        }
+        if (this.keyPart < Byte.MIN_VALUE) {
+            this.keyPart = Byte.MAX_VALUE - ((this.keyPart * -1) % 255);
+        }
     }
     
     public String Serialize() {
