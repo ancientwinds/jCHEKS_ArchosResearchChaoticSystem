@@ -29,7 +29,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     
     //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
     @Override
-    public void Evolve(int factor) {
+    public void evolveSystem(int factor) {
         this.keyPointer++;
         
         if (this.keyPointer >= this.keyList.size()) {
@@ -41,30 +41,30 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     }
     
     @Override
-    public byte[] Key(int requiredLength) throws Exception{
+    public byte[] getKey(int requiredLength) throws Exception{
         byte[] fullKey = new byte[0];
         
-        ChaoticSystemMock clone = this.Clone();
+        ChaoticSystemMock clone = this.cloneSystem();
         
         do {
-            byte[] keyPart = clone.Key();
+            byte[] keyPart = clone.getKey();
             
             fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
             System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
             
-            clone.Evolve();
+            clone.evolveSystem();
         } while (fullKey.length < requiredLength);
         
         return fullKey;
     }
     
     @Override
-    public void Reset() {
+    public void resetSystem() {
         // TODO : Demander à François ce qu'il voyait là-dedans!
     }
     
     @Override
-    public ChaoticSystemMock Clone() throws Exception{
+    public ChaoticSystemMock cloneSystem() throws Exception{
         return new ChaoticSystemMock();
     } 
     
@@ -94,7 +94,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     }
     
     @Override
-    protected void Generate(int keyLength) throws Exception {
+    protected void generateSystem(int keyLength) throws Exception {
        this.keyLength = 128;
        this.lastGeneratedKey = this.keyList.get(keyPointer);
        this.lastGeneratedIV = this.ivList.get(keyPointer);

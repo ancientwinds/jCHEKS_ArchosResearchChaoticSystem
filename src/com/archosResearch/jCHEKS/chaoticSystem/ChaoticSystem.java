@@ -37,7 +37,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     
     //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
     @Override
-    public void Evolve(int factor) {
+    public void evolveSystem(int factor) {
         this.agents.entrySet().stream().forEach((a) -> {
            ((Agent)a.getValue()).SendImpacts(this);
         });
@@ -50,18 +50,18 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     }
 
     @Override
-    public byte[] Key(int requiredLength) throws Exception{
+    public byte[] getKey(int requiredLength) throws Exception{
         byte[] fullKey = new byte[0];
         
         try {
-            ChaoticSystem clone = this.Clone();
+            ChaoticSystem clone = this.cloneSystem();
             do {
-                byte[] keyPart = clone.Key();
+                byte[] keyPart = clone.getKey();
 
                 fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
                 System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
 
-                clone.Evolve();
+                clone.evolveSystem();
             } while (fullKey.length < requiredLength);
         
             return fullKey;
@@ -73,12 +73,12 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     }
 
     @Override
-    public void Reset() {
+    public void resetSystem() {
         // TODO : Demander à François ce qu'il voyait là-dedans!
     }
 
     @Override
-    public ChaoticSystem Clone() throws Exception {
+    public ChaoticSystem cloneSystem() throws Exception {
         try {
             ChaoticSystem system = new ChaoticSystem(this.systemId, this.keyLength);
             system.Deserialize(this.Serialize());
@@ -127,7 +127,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     }
 
     @Override
-    protected void Generate(int keyLength) throws Exception {
+    protected void generateSystem(int keyLength) throws Exception {
         this.keyLength = keyLength;
         
         if ((this.keyLength % 128) != 0) {
