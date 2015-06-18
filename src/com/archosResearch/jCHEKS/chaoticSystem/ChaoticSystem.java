@@ -3,10 +3,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 //<editor-fold defaultstate="collapsed" desc="Imports">
 
 import java.util.Arrays;
-import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 //</editor-fold>
@@ -17,7 +14,7 @@ import java.util.logging.Logger;
  */
 public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem {
     //<editor-fold defaultstate="collapsed" desc="Properties">
-    private HashMap<Integer, Object> agents = new HashMap<>();
+    private final HashMap<Integer, Agent> agents = new HashMap();
     //</editor-fold>
 
     public ChaoticSystem(String uniqueId, int keyLength) throws Exception {
@@ -25,7 +22,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     }
     
     //<editor-fold defaultstate="collapsed" desc="Accessors">
-    public HashMap<Integer, Object> getAgents() {
+    public HashMap<Integer, Agent> getAgents() {
         return this.agents;
     }
     //</editor-fold>
