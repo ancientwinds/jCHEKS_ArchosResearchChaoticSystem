@@ -5,6 +5,8 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 import java.util.Arrays;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 //</editor-fold>
@@ -17,6 +19,10 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     //<editor-fold defaultstate="collapsed" desc="Properties">
     private HashMap<Integer, Object> agents = new HashMap<>();
     //</editor-fold>
+
+    public ChaoticSystem(String uniqueId, int keyLength) throws Exception {
+        super(uniqueId, keyLength);
+    }
     
     //<editor-fold defaultstate="collapsed" desc="Accessors">
     public HashMap<Integer, Object> getAgents() {
@@ -25,6 +31,11 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Constructors">
+    /*public ChaoticSystem(String uniqueId, int keyLength) throws Exception {
+        super(uniqueId, keyLength);
+        this.Generate(this.keyLength);
+    }*/
+
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
@@ -42,21 +53,26 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     }
 
     @Override
-    public byte[] Key(int requiredLength) {
+    public byte[] Key(int requiredLength) throws Exception{
         byte[] fullKey = new byte[0];
         
-        ChaoticSystem clone = this.Clone();
+        try {
+            ChaoticSystem clone = this.Clone();
+            do {
+                byte[] keyPart = clone.Key();
+
+                fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
+                System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
+
+                clone.Evolve();
+            } while (fullKey.length < requiredLength);
         
-        do {
-            byte[] keyPart = clone.Key();
-            
-            fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
-            System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
-            
-            clone.Evolve();
-        } while (fullKey.length < requiredLength);
+            return fullKey;
+        } catch (Exception ex) {
+            throw new Exception("Error while getting a key", ex);
+        }
         
-        return fullKey;
+
     }
 
     @Override
@@ -65,10 +81,15 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     }
 
     @Override
-    public ChaoticSystem Clone() {
-        ChaoticSystem system = new ChaoticSystem();
-        system.Deserialize(this.Serialize());
-        return system;
+    public ChaoticSystem Clone() throws Exception {
+        try {
+            ChaoticSystem system = new ChaoticSystem(this.systemId, this.keyLength);
+            system.Deserialize(this.Serialize());
+            return system;
+        } catch (Exception ex) {
+            throw new Exception("Error during the cloning process", ex);
+        }
+        
     }
 
     @Override
@@ -109,7 +130,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     }
 
     @Override
-    public void Generate(int keyLength) throws Exception {
+    protected void Generate(int keyLength) throws Exception {
         this.keyLength = keyLength;
         
         if ((this.keyLength % 128) != 0) {
