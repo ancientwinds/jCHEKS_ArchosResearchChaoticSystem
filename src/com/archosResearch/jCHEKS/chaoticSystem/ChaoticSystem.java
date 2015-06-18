@@ -2,8 +2,25 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 
 
 //</editor-fold>
@@ -14,11 +31,12 @@ import java.util.HashMap;
  */
 public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem {
     //<editor-fold defaultstate="collapsed" desc="Properties">
-    private final HashMap<Integer, Agent> agents = new HashMap();
+    private HashMap<Integer, Agent> agents = new HashMap();
     //</editor-fold>
 
     public ChaoticSystem(String uniqueId, int keyLength) throws Exception {
         super(uniqueId, keyLength);
+        this.generateSystem(keyLength);
     }
     
     //<editor-fold defaultstate="collapsed" desc="Accessors">
@@ -125,7 +143,80 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
             this.agents.put(tempAgent.getAgentId(), tempAgent);
         }
     }
+    
+    public void deserializeXML(File xmlFile) throws Exception {
+        
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(xmlFile);
+        
+        this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent(); 
+        this.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
+        
+        this.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
+        this.lastGeneratedIV = Utils.StringToByteArray(doc.getElementsByTagName("lastIV").item(0).getTextContent());
+        
+        NodeList nList = doc.getElementsByTagName("agents");
+        
+        for(int i = 0; i < nList.getLength(); i++) {
+            Node nNode = nList.item(i);
+            if(nNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) nNode;
+                
+                Agent tempAgent = new Agent(element.getElementsByTagName("agent").item(0).getTextContent());
+                this.agents.put(tempAgent.getAgentId(), tempAgent);
+            }
+        }
+        
+    }
 
+    public void serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            
+            Document doc = docBuilder.newDocument();
+            Element rootElement = doc.createElement("chaoticSystem");
+            doc.appendChild(rootElement);
+            
+            Element systemId = doc.createElement("systemId");
+            systemId.appendChild(doc.createTextNode(this.systemId));         
+            rootElement.appendChild(systemId);
+            
+            Element keyLength = doc.createElement("keyLength");
+            keyLength.appendChild(doc.createTextNode(Integer.toString(this.keyLength)));         
+            rootElement.appendChild(keyLength);
+            
+            Element lastKey = doc.createElement("lastKey");
+            lastKey.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedKey)));         
+            rootElement.appendChild(lastKey);
+            
+            Element lastIV = doc.createElement("lastIV");
+            lastIV.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedIV)));         
+            rootElement.appendChild(lastIV);
+            
+            Element agentsElement = doc.createElement("agents");
+            
+            this.agents.entrySet().forEach((a) -> {            
+                Element agent = doc.createElement("agent");
+                agent.appendChild(doc.createTextNode(((Agent)a.getValue()).Serialize()));         
+                agentsElement.appendChild(agent);
+            });
+            
+            rootElement.appendChild(agentsElement);
+            
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		Transformer transformer = transformerFactory.newTransformer();
+		DOMSource source = new DOMSource(doc);
+		StreamResult result = new StreamResult(new File("file.xml"));
+ 
+		transformer.transform(source, result);
+            
+        } catch (ParserConfigurationException ex) {
+            throw new Exception("Error serializing", ex);
+        }      
+    }
+    
     @Override
     protected void generateSystem(int keyLength) throws Exception {
         this.keyLength = keyLength;
@@ -142,6 +233,21 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
         this.BuildKey();
     }
     //</editor-fold>
+    
+    public static void main(String argv[]) {
+        try {
+            FileReader fileReader = new FileReader();
+            
+            ChaoticSystem system = new ChaoticSystem("temp", 128);//= fileReader.readChaoticSystem("test.sre");
+            fileReader.saveChaoticSystem("test.xml", system);
+            //system.serializeXML()
+            System.out.println(Utils.ByteArrayToString(system.getIV()));
+            System.out.println(Utils.ByteArrayToString(system.getKey()));
+
+        } catch (Exception ex) {
+            Logger.getLogger(ChaoticSystem.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     //<editor-fold defaultstate="collapsed" desc="Methods">
     private void BuildKey() {
