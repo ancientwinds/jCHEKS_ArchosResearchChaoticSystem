@@ -14,6 +14,8 @@ import java.util.HashMap;
  * @author jean-francois
  */
 public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem {
+    
+    //TODO use a map of <Integer, Agent> instead
     //<editor-fold defaultstate="collapsed" desc="Properties">
     private HashMap<Integer, Object> agents = new HashMap<>();
     //</editor-fold>
@@ -62,6 +64,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     @Override
     public void Reset() {
         // TODO : Demander à François ce qu'il voyait là-dedans!
+        //TODO FG: I think the idea is to revert to the system before cloning...
     }
 
     @Override
@@ -108,6 +111,8 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
         }
     }
 
+    
+    //TODO shouldn't this method be a static factory (or maybe useless if we have a contrcutor with parameters) ?
     @Override
     public void Generate(int keyLength) throws Exception {
         this.keyLength = keyLength;
@@ -116,6 +121,8 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
             throw new Exception("Invalid key length. Must be a multiple of 128.");
         }
         
+        //TODO is the initialization vector (+16) always a fixed size ?
+        //TODO We might want another extra for the cipherCheck
         int numberOfAgents = (this.keyLength / 8) + 16;
         for (int i = 0; i < numberOfAgents; i++) {
             this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents-1));
