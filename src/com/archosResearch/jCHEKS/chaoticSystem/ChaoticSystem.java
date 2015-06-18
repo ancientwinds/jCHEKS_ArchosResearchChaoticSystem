@@ -238,7 +238,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
         try {
             FileReader fileReader = new FileReader();
             
-            ChaoticSystem system = new ChaoticSystem("temp", 128);//= fileReader.readChaoticSystem("test.sre");
+            ChaoticSystem system = fileReader.readChaoticSystem("test.sre");
             fileReader.saveChaoticSystem("test.xml", system);
             //system.serializeXML()
             System.out.println(Utils.ByteArrayToString(system.getIV()));

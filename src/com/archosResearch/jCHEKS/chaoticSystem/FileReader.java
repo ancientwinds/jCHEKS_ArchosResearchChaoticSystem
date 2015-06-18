@@ -8,8 +8,13 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -35,19 +40,17 @@ public class FileReader {
         throw new Exception("File not compatible");
     }
     
-    public void saveChaoticSystem(String fileName, ChaoticSystem system) {
-        try {
+    public void saveChaoticSystem(String fileName, ChaoticSystem system) throws Exception {
+        
             String extension = this.getFileExtension(fileName);
-            BufferedWriter writer = new BufferedWriter( new FileWriter(fileName));
             if(extension.equals("xml")) {
                 system.serializeXML();
             } else if(extension.equals("sre")) {
-                writer.write(system.Serialize());
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(fileName), "utf-8"))) {
+            writer.write(system.Serialize());
+         
             }
-        } catch (IOException ex) {
-            Logger.getLogger(FileReader.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(FileReader.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
