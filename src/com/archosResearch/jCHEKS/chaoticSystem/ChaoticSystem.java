@@ -162,8 +162,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
                 Agent tempAgent = new Agent(element.getElementsByTagName("agent").item(0).getTextContent());
                 this.agents.put(tempAgent.getAgentId(), tempAgent);
             }
-        }
-        
+        }        
     }
 
     public Document serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
@@ -201,8 +200,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
             
             rootElement.appendChild(agentsElement);
             
-            return doc;
-            
+            return doc;            
         } catch (ParserConfigurationException ex) {
             throw new Exception("Error serializing XML", ex);
         }      
@@ -224,21 +222,6 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
         this.BuildKey();
     }
     //</editor-fold>
-    
-    public static void main(String argv[]) {
-        try {
-            FileReader fileReader = new FileReader();
-            
-            ChaoticSystem system = fileReader.readChaoticSystem("test.sre");
-            fileReader.saveChaoticSystem("test.xml", system);
-            //system.serializeXML()
-            System.out.println(Utils.ByteArrayToString(system.getIV()));
-            System.out.println(Utils.ByteArrayToString(system.getKey()));
-
-        } catch (Exception ex) {
-            Logger.getLogger(ChaoticSystem.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
     
     //<editor-fold defaultstate="collapsed" desc="Methods">
     private void BuildKey() {
