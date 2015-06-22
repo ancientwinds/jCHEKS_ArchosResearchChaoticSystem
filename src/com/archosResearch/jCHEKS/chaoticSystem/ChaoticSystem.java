@@ -10,12 +10,8 @@ import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -170,7 +166,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
         
     }
 
-    public void serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
+    public Document serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -179,13 +175,13 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
             Element rootElement = doc.createElement("chaoticSystem");
             doc.appendChild(rootElement);
             
-            Element systemId = doc.createElement("systemId");
-            systemId.appendChild(doc.createTextNode(this.systemId));         
-            rootElement.appendChild(systemId);
+            Element systemIdElement = doc.createElement("systemId");
+            systemIdElement.appendChild(doc.createTextNode(this.systemId));         
+            rootElement.appendChild(systemIdElement);
             
-            Element keyLength = doc.createElement("keyLength");
-            keyLength.appendChild(doc.createTextNode(Integer.toString(this.keyLength)));         
-            rootElement.appendChild(keyLength);
+            Element keyLengthElement = doc.createElement("keyLength");
+            keyLengthElement.appendChild(doc.createTextNode(Integer.toString(this.keyLength)));         
+            rootElement.appendChild(keyLengthElement);
             
             Element lastKey = doc.createElement("lastKey");
             lastKey.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedKey)));         
@@ -205,15 +201,10 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
             
             rootElement.appendChild(agentsElement);
             
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
-		DOMSource source = new DOMSource(doc);
-		StreamResult result = new StreamResult(new File("file.xml"));
- 
-		transformer.transform(source, result);
+            return doc;
             
         } catch (ParserConfigurationException ex) {
-            throw new Exception("Error serializing", ex);
+            throw new Exception("Error serializing XML", ex);
         }      
     }
     

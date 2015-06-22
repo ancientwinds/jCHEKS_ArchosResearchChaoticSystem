@@ -5,21 +5,20 @@
  */
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
 
 /**
  *
@@ -44,12 +43,16 @@ public class FileReader {
         
             String extension = this.getFileExtension(fileName);
             if(extension.equals("xml")) {
-                system.serializeXML();
+                Document doc = system.serializeXML();
+                TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                Transformer transformer = transformerFactory.newTransformer();
+                DOMSource source = new DOMSource(doc);
+                StreamResult result = new StreamResult(new File(fileName));
+                transformer.transform(source, result);
             } else if(extension.equals("sre")) {
                 try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(fileName), "utf-8"))) {
-            writer.write(system.Serialize());
-         
+                writer.write(system.Serialize());         
             }
         }
     }
