@@ -5,8 +5,6 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -27,13 +25,9 @@ import org.w3c.dom.NodeList;
  */
 public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem {
     //<editor-fold defaultstate="collapsed" desc="Properties">
-    private HashMap<Integer, Agent> agents = new HashMap();
+    private final HashMap<Integer, Agent> agents = new HashMap();
     //</editor-fold>
 
-    public ChaoticSystem(int keyLength) throws Exception {
-        super(keyLength);
-        this.generateSystem(this.keyLength);
-    }
     
     //<editor-fold defaultstate="collapsed" desc="Accessors">
     public HashMap<Integer, Agent> getAgents() {
@@ -42,11 +36,11 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Constructors">
-    /*public ChaoticSystem(String uniqueId, int keyLength) throws Exception {
-        super(uniqueId, keyLength);
-        this.Generate(this.keyLength);
-    }*/
 
+    public ChaoticSystem(int keyLength) throws Exception {
+        super(keyLength);
+        this.generateSystem(this.keyLength);
+    }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
