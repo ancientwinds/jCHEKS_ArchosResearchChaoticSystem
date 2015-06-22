@@ -27,31 +27,34 @@ import org.w3c.dom.Document;
 public class FileReader {
     
     public ChaoticSystem readChaoticSystem(String fileName) throws Exception {
+        File dir = new File("system/");
+        dir.mkdirs();
         ChaoticSystem system = new ChaoticSystem(128);
         String extension = this.getFileExtension(fileName);
         if(extension.equals("xml")) {            
-            system.deserializeXML(new File(fileName));
+            system.deserializeXML(new File("system/" + fileName));
             return system;
         } else if(extension.equals("sre")) {
-            system.Deserialize(readFile(fileName, null));
+            system.Deserialize(readFile("system/" + fileName, null));
             return system;  
         }        
         throw new Exception("File not compatible");
     }
     
     public void saveChaoticSystem(String fileName, ChaoticSystem system) throws Exception {
-        
-            String extension = this.getFileExtension(fileName);
-            if(extension.equals("xml")) {
-                Document doc = system.serializeXML();
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                DOMSource source = new DOMSource(doc);
-                StreamResult result = new StreamResult(new File(fileName));
-                transformer.transform(source, result);
-            } else if(extension.equals("sre")) {
-                try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(fileName), "utf-8"))) {
+        File dir = new File("system/");
+        dir.mkdirs();
+        String extension = this.getFileExtension(fileName);
+        if(extension.equals("xml")) {
+            Document doc = system.serializeXML();
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File("system/" + fileName));
+            transformer.transform(source, result);
+        } else if(extension.equals("sre")) {
+            try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream("system/" + fileName), "utf-8"))) {
                 writer.write(system.Serialize());         
             }
         }
