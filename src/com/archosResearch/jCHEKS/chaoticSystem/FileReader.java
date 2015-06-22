@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class FileReader {
     
     public ChaoticSystem readChaoticSystem(String fileName) throws Exception {
-        ChaoticSystem system = new ChaoticSystem("", 128);
+        ChaoticSystem system = new ChaoticSystem(128);
         String extension = this.getFileExtension(fileName);
         if(extension.equals("xml")) {            
             system.deserializeXML(new File(fileName));

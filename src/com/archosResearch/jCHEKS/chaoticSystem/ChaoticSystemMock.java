@@ -19,7 +19,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
     public ChaoticSystemMock() throws Exception {
-        super(java.util.UUID.randomUUID().toString(), 128);
+        super(128);
         
         this.keyPointer = 0;
         

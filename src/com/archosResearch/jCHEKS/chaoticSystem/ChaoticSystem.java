@@ -34,9 +34,9 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     private HashMap<Integer, Agent> agents = new HashMap();
     //</editor-fold>
 
-    public ChaoticSystem(String uniqueId, int keyLength) throws Exception {
-        super(uniqueId, keyLength);
-        this.generateSystem(keyLength);
+    public ChaoticSystem(int keyLength) throws Exception {
+        super(keyLength);
+        this.generateSystem(this.keyLength);
     }
     
     //<editor-fold defaultstate="collapsed" desc="Accessors">
@@ -98,7 +98,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     @Override
     public ChaoticSystem cloneSystem() throws Exception {
         try {
-            ChaoticSystem system = new ChaoticSystem(this.systemId, this.keyLength);
+            ChaoticSystem system = new ChaoticSystem(this.keyLength);
             system.Deserialize(this.Serialize());
             return system;
         } catch (Exception ex) {
