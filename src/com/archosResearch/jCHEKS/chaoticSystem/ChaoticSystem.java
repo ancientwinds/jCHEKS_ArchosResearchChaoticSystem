@@ -2,6 +2,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
 
+import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,14 +24,13 @@ import org.w3c.dom.NodeList;
  *
  * @author jean-francois
  */
-public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem {
+public class ChaoticSystem extends AbstractChaoticSystem {
     
     //TODO use a map of <Integer, Agent> instead
     //<editor-fold defaultstate="collapsed" desc="Properties">
-    private final HashMap<Integer, Agent> agents = new HashMap();
+    private HashMap<Integer, Agent> agents = new HashMap();
     //</editor-fold>
 
-    
     //<editor-fold defaultstate="collapsed" desc="Accessors">
     public HashMap<Integer, Agent> getAgents() {
         return this.agents;
@@ -130,6 +130,7 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
         this.lastGeneratedKey = Utils.StringToByteArray(values[2]);
         this.lastGeneratedIV = Utils.StringToByteArray(values[3]);
         
+        this.agents = new HashMap();
         String[] agentValues = values[4].substring(1).split("A");
         for (String agentString : agentValues) {
             Agent tempAgent = new Agent(agentString);
@@ -142,23 +143,21 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(xmlFile);
-        
+        doc.getDocumentElement().normalize();
         this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent(); 
         this.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
         
         this.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
         this.lastGeneratedIV = Utils.StringToByteArray(doc.getElementsByTagName("lastIV").item(0).getTextContent());
         
-        NodeList nList = doc.getElementsByTagName("agents");
-        
+        NodeList nList = doc.getElementsByTagName("agent");
+        this.agents = new HashMap();
+        System.out.println("Agents count: " + nList.getLength());
         for(int i = 0; i < nList.getLength(); i++) {
-            Node nNode = nList.item(i);
-            if(nNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element element = (Element) nNode;
-                
-                Agent tempAgent = new Agent(element.getElementsByTagName("agent").item(0).getTextContent());
-                this.agents.put(tempAgent.getAgentId(), tempAgent);
-            }
+            Node element = nList.item(i);
+            Agent tempAgent = new Agent(element.getTextContent());
+            this.agents.put(tempAgent.getAgentId(), tempAgent);
+           
         }        
     }
 
