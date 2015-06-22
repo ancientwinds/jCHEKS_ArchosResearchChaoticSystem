@@ -20,8 +20,8 @@ public class ChaoticSystemTest {
     
     @Test
     public void ChaoticSystemTest() throws Exception {
-        ChaoticSystem system1 = new ChaoticSystem(java.util.UUID.randomUUID().toString(), 128);
-        ChaoticSystem system2 = new ChaoticSystem(java.util.UUID.randomUUID().toString(), 128);
+        ChaoticSystem system1 = new ChaoticSystem(128);
+        ChaoticSystem system2 = new ChaoticSystem(128);
         
         system2.Deserialize(system1.Serialize());
         
