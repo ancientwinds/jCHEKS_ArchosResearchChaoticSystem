@@ -24,6 +24,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
         this.keyPointer = 0;
         
         this.InitializeMockKeysAndIVs();
+        this.generateSystem(128);
     }
     //</editor-fold>
     
