@@ -152,7 +152,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         
         NodeList nList = doc.getElementsByTagName("agent");
         this.agents = new HashMap();
-        System.out.println("Agents count: " + nList.getLength());
+
         for(int i = 0; i < nList.getLength(); i++) {
             Node element = nList.item(i);
             Agent tempAgent = new Agent(element.getTextContent());
