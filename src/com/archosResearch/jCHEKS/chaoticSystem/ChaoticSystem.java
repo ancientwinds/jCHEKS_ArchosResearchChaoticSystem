@@ -2,9 +2,19 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
 
+import java.io.File;
 import java.util.Arrays;
-import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.util.HashMap;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 
 
 //</editor-fold>
@@ -15,21 +25,27 @@ import java.util.HashMap;
  */
 public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem {
     //<editor-fold defaultstate="collapsed" desc="Properties">
-    private HashMap<Integer, Object> agents = new HashMap<>();
+    private final HashMap<Integer, Agent> agents = new HashMap();
     //</editor-fold>
+
     
     //<editor-fold defaultstate="collapsed" desc="Accessors">
-    public HashMap<Integer, Object> getAgents() {
+    public HashMap<Integer, Agent> getAgents() {
         return this.agents;
     }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Constructors">
+
+    public ChaoticSystem(int keyLength) throws Exception {
+        super(keyLength);
+        this.generateSystem(this.keyLength);
+    }
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
     @Override
-    public void Evolve(int factor) {
+    public void evolveSystem(int factor) {
         this.agents.entrySet().stream().forEach((a) -> {
            ((Agent)a.getValue()).SendImpacts(this);
         });
@@ -42,33 +58,43 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
     }
 
     @Override
-    public byte[] Key(int requiredLength) {
+    public byte[] getKey(int requiredLength) throws Exception{
         byte[] fullKey = new byte[0];
         
-        ChaoticSystem clone = this.Clone();
+        try {
+            ChaoticSystem clone = this.cloneSystem();
+            do {
+                byte[] keyPart = clone.getKey();
+
+                fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
+                System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
+
+                clone.evolveSystem();
+            } while (fullKey.length < requiredLength);
         
-        do {
-            byte[] keyPart = clone.Key();
-            
-            fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
-            System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
-            
-            clone.Evolve();
-        } while (fullKey.length < requiredLength);
+            return fullKey;
+        } catch (Exception ex) {
+            throw new Exception("Error while getting a key", ex);
+        }
         
-        return fullKey;
+
     }
 
     @Override
-    public void Reset() {
+    public void resetSystem() {
         // TODO : Demander à François ce qu'il voyait là-dedans!
     }
 
     @Override
-    public ChaoticSystem Clone() {
-        ChaoticSystem system = new ChaoticSystem();
-        system.Deserialize(this.Serialize());
-        return system;
+    public ChaoticSystem cloneSystem() throws Exception {
+        try {
+            ChaoticSystem system = new ChaoticSystem(this.keyLength);
+            system.Deserialize(this.Serialize());
+            return system;
+        } catch (Exception ex) {
+            throw new Exception("Error during the cloning process", ex);
+        }
+        
     }
 
     @Override
@@ -107,9 +133,75 @@ public class ChaoticSystem extends com.archosResearch.jCHEKS.concept.chaoticSyst
             this.agents.put(tempAgent.getAgentId(), tempAgent);
         }
     }
+    
+    public void deserializeXML(File xmlFile) throws Exception {
+        
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(xmlFile);
+        
+        this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent(); 
+        this.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
+        
+        this.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
+        this.lastGeneratedIV = Utils.StringToByteArray(doc.getElementsByTagName("lastIV").item(0).getTextContent());
+        
+        NodeList nList = doc.getElementsByTagName("agents");
+        
+        for(int i = 0; i < nList.getLength(); i++) {
+            Node nNode = nList.item(i);
+            if(nNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element element = (Element) nNode;
+                
+                Agent tempAgent = new Agent(element.getElementsByTagName("agent").item(0).getTextContent());
+                this.agents.put(tempAgent.getAgentId(), tempAgent);
+            }
+        }        
+    }
 
+    public Document serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            
+            Document doc = docBuilder.newDocument();
+            Element rootElement = doc.createElement("chaoticSystem");
+            doc.appendChild(rootElement);
+            
+            Element systemIdElement = doc.createElement("systemId");
+            systemIdElement.appendChild(doc.createTextNode(this.systemId));         
+            rootElement.appendChild(systemIdElement);
+            
+            Element keyLengthElement = doc.createElement("keyLength");
+            keyLengthElement.appendChild(doc.createTextNode(Integer.toString(this.keyLength)));         
+            rootElement.appendChild(keyLengthElement);
+            
+            Element lastKey = doc.createElement("lastKey");
+            lastKey.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedKey)));         
+            rootElement.appendChild(lastKey);
+            
+            Element lastIV = doc.createElement("lastIV");
+            lastIV.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedIV)));         
+            rootElement.appendChild(lastIV);
+            
+            Element agentsElement = doc.createElement("agents");
+            
+            this.agents.entrySet().forEach((a) -> {            
+                Element agent = doc.createElement("agent");
+                agent.appendChild(doc.createTextNode(((Agent)a.getValue()).Serialize()));         
+                agentsElement.appendChild(agent);
+            });
+            
+            rootElement.appendChild(agentsElement);
+            
+            return doc;            
+        } catch (ParserConfigurationException ex) {
+            throw new Exception("Error serializing XML", ex);
+        }      
+    }
+    
     @Override
-    public void Generate(int keyLength) throws Exception {
+    protected void generateSystem(int keyLength) throws Exception {
         this.keyLength = keyLength;
         
         if ((this.keyLength % 128) != 0) {
