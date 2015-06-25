@@ -203,7 +203,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     }
     
     @Override
-    protected void generateSystem(int keyLength) throws Exception {
+    public final void generateSystem(int keyLength) throws Exception {
         this.keyLength = keyLength;
         
         if ((this.keyLength % 128) != 0) {
