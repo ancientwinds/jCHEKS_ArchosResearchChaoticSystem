@@ -181,8 +181,8 @@ public class ChaoticSystem extends AbstractChaoticSystem {
 
         NodeList nList = doc.getElementsByTagName("agent");
         this.agents = new HashMap();
-        System.out.println("Agents count: " + nList.getLength());
-        for (int i = 0; i < nList.getLength(); i++) {
+
+        for(int i = 0; i < nList.getLength(); i++) {
             Node element = nList.item(i);
             Agent tempAgent = new Agent(element.getTextContent());
             this.agents.put(tempAgent.getAgentId(), tempAgent);
@@ -228,7 +228,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     }
 
     @Override
-    protected void generateSystem(int keyLength) throws Exception {
+    public final void generateSystem(int keyLength) throws Exception {
         this.keyLength = keyLength;
 
         if ((this.keyLength % 128) != 0) {
