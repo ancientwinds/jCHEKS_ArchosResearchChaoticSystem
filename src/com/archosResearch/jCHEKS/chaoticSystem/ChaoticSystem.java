@@ -1,11 +1,9 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
-
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -15,9 +13,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-
-
 //</editor-fold>
 
 /**
@@ -25,10 +20,13 @@ import org.w3c.dom.NodeList;
  * @author jean-francois
  */
 public class ChaoticSystem extends AbstractChaoticSystem {
-    
-    //TODO use a map of <Integer, Agent> instead
+
     //<editor-fold defaultstate="collapsed" desc="Properties">
     private HashMap<Integer, Agent> agents = new HashMap();
+    private int lastGeneratedKeyIndex;
+    private AbstractChaoticSystem currentClone;
+    private byte[] toGenerateKey;
+    private int toGenerateKeyIndex;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Accessors">
@@ -36,50 +34,86 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         return this.agents;
     }
     //</editor-fold>
-    
-    //<editor-fold defaultstate="collapsed" desc="Constructors">
 
+    //<editor-fold defaultstate="collapsed" desc="Constructors">
     public ChaoticSystem(int keyLength) throws Exception {
         super(keyLength);
         this.generateSystem(this.keyLength);
     }
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
     @Override
     public void evolveSystem(int factor) {
         this.agents.entrySet().stream().forEach((a) -> {
-           ((Agent)a.getValue()).SendImpacts(this);
+            ((Agent) a.getValue()).sendImpacts(this);
         });
-        
+
         this.agents.entrySet().stream().forEach((a) -> {
-           ((Agent)a.getValue()).Evolve(factor, this.maxImpact);
+            ((Agent) a.getValue()).evolve(factor, this.maxImpact);
         });
-        
-        this.BuildKey();
+
+        this.buildKey();
+        this.currentClone = null;
+        this.lastGeneratedKeyIndex = 0;
+
     }
 
     @Override
-    public byte[] getKey(int requiredLength) throws Exception{
-        byte[] fullKey = new byte[0];
-        
-        try {
-            ChaoticSystem clone = this.cloneSystem();
-            do {
-                byte[] keyPart = clone.getKey();
-
-                fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
-                System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
-
-                clone.evolveSystem();
-            } while (fullKey.length < requiredLength);
-        
-            return fullKey;
-        } catch (Exception ex) {
-            throw new Exception("Error while getting a key", ex);
+    public byte[] getKey(int requiredBitLength) throws Exception {
+        if (requiredBitLength % Byte.SIZE == 0) {
+            return generateByteKey(requiredBitLength / Byte.SIZE);
         }
-        
+        throw new Exception();
+    }
 
+    private byte[] generateByteKey(int requiredByteLength) throws Exception {
+        this.toGenerateKey = new byte[requiredByteLength];
+        if (requiredByteLength >= this.lastGeneratedKey.length - this.lastGeneratedKeyIndex) {
+            this.toGenerateKeyIndex = 0;
+            setClone();
+            pickCloneKey();
+            while (this.toGenerateKeyIndex < requiredByteLength) {
+                fillKey();
+                if (this.toGenerateKeyIndex < requiredByteLength - 1) {
+                    evolveClone();
+                }
+            }
+        } else {
+            copyBytesFromLastToNextKey(requiredByteLength);
+            this.lastGeneratedKeyIndex += requiredByteLength;
+        }
+        return this.toGenerateKey;
+    }
+
+    private void copyBytesFromLastToNextKey(int numberOfBytesToCopy) {
+        System.arraycopy(this.lastGeneratedKey, lastGeneratedKeyIndex, this.toGenerateKey, this.toGenerateKeyIndex, numberOfBytesToCopy);
+    }
+
+    private void fillKey() {
+        int numberOfByteToCopy = getNumberOfByteToCopy(this.toGenerateKey.length, this.toGenerateKeyIndex);
+        copyBytesFromLastToNextKey(numberOfByteToCopy);
+        this.toGenerateKeyIndex += numberOfByteToCopy;
+        this.lastGeneratedKeyIndex += numberOfByteToCopy;
+    }
+
+    private int getNumberOfByteToCopy(int requiredLength, int fullKeyIndex) {
+        int numberOfMissingBytes = requiredLength - fullKeyIndex;
+        return (this.lastGeneratedKey.length - this.lastGeneratedKeyIndex > numberOfMissingBytes) ? numberOfMissingBytes : this.lastGeneratedKey.length - lastGeneratedKeyIndex;
+    }
+
+    private void evolveClone() {
+        this.currentClone.evolveSystem();
+        this.lastGeneratedKey = this.currentClone.getKey();
+        this.lastGeneratedKeyIndex = 0;
+    }
+
+    private void pickCloneKey() {
+        this.lastGeneratedKey = this.currentClone.getKey();
+    }
+
+    private void setClone() throws Exception {
+        this.currentClone = (this.currentClone == null) ? cloneSystem() : this.currentClone;
     }
 
     @Override
@@ -92,30 +126,27 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     public ChaoticSystem cloneSystem() throws Exception {
         try {
             ChaoticSystem system = new ChaoticSystem(this.keyLength);
-            system.Deserialize(this.Serialize());
+            system.Deserialize(this.serialize());
             return system;
         } catch (Exception ex) {
             throw new Exception("Error during the cloning process", ex);
         }
-        
+
     }
 
     @Override
-    public String Serialize() {
+    public String serialize() {
         StringBuilder sb = new StringBuilder();
-        
+
         sb.append(this.systemId);
         sb.append("!");
         sb.append(String.valueOf(this.keyLength));
         sb.append("!");
         sb.append(Utils.ByteArrayToString(this.lastGeneratedKey));
         sb.append("!");
-        sb.append(Utils.ByteArrayToString(this.lastGeneratedIV));
-        sb.append("!");
-        
         this.agents.entrySet().forEach((a) -> {
             sb.append("A");
-            sb.append(((Agent)a.getValue()).Serialize());
+            sb.append(((Agent) a.getValue()).serialize());
         });
 
         return sb.toString();
@@ -124,114 +155,102 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     @Override
     public void Deserialize(String serialization) {
         String[] values = serialization.split("!");
-        
+
         this.systemId = values[0];
         this.keyLength = Integer.parseInt(values[1]);
         this.lastGeneratedKey = Utils.StringToByteArray(values[2]);
-        this.lastGeneratedIV = Utils.StringToByteArray(values[3]);
-        
+
         this.agents = new HashMap();
-        String[] agentValues = values[4].substring(1).split("A");
+        String[] agentValues = values[3].substring(1).split("A");
         for (String agentString : agentValues) {
             Agent tempAgent = new Agent(agentString);
             this.agents.put(tempAgent.getAgentId(), tempAgent);
         }
     }
-    
+
     public void deserializeXML(File xmlFile) throws Exception {
-        
+
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(xmlFile);
         doc.getDocumentElement().normalize();
-        this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent(); 
+        this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
         this.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
-        
+
         this.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
-        this.lastGeneratedIV = Utils.StringToByteArray(doc.getElementsByTagName("lastIV").item(0).getTextContent());
-        
+
         NodeList nList = doc.getElementsByTagName("agent");
         this.agents = new HashMap();
         System.out.println("Agents count: " + nList.getLength());
-        for(int i = 0; i < nList.getLength(); i++) {
+        for (int i = 0; i < nList.getLength(); i++) {
             Node element = nList.item(i);
             Agent tempAgent = new Agent(element.getTextContent());
             this.agents.put(tempAgent.getAgentId(), tempAgent);
-           
-        }        
+
+        }
     }
 
     public Document serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            
+
             Document doc = docBuilder.newDocument();
             Element rootElement = doc.createElement("chaoticSystem");
             doc.appendChild(rootElement);
-            
+
             Element systemIdElement = doc.createElement("systemId");
-            systemIdElement.appendChild(doc.createTextNode(this.systemId));         
+            systemIdElement.appendChild(doc.createTextNode(this.systemId));
             rootElement.appendChild(systemIdElement);
-            
+
             Element keyLengthElement = doc.createElement("keyLength");
-            keyLengthElement.appendChild(doc.createTextNode(Integer.toString(this.keyLength)));         
+            keyLengthElement.appendChild(doc.createTextNode(Integer.toString(this.keyLength)));
             rootElement.appendChild(keyLengthElement);
-            
+
             Element lastKey = doc.createElement("lastKey");
-            lastKey.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedKey)));         
+            lastKey.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedKey)));
             rootElement.appendChild(lastKey);
-            
-            Element lastIV = doc.createElement("lastIV");
-            lastIV.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedIV)));         
-            rootElement.appendChild(lastIV);
-            
+
             Element agentsElement = doc.createElement("agents");
-            
-            this.agents.entrySet().forEach((a) -> {            
+
+            this.agents.entrySet().forEach((a) -> {
                 Element agent = doc.createElement("agent");
-                agent.appendChild(doc.createTextNode(((Agent)a.getValue()).Serialize()));         
+                agent.appendChild(doc.createTextNode(((Agent) a.getValue()).serialize()));
                 agentsElement.appendChild(agent);
             });
-            
+
             rootElement.appendChild(agentsElement);
-            
-            return doc;            
+
+            return doc;
         } catch (ParserConfigurationException ex) {
             throw new Exception("Error serializing XML", ex);
-        }      
+        }
     }
-    
+
     @Override
     protected void generateSystem(int keyLength) throws Exception {
         this.keyLength = keyLength;
-        
+
         if ((this.keyLength % 128) != 0) {
             throw new Exception("Invalid key length. Must be a multiple of 128.");
         }
-        
-        //TODO is the initialization vector (+16) always a fixed size ?
+
         //TODO We might want another extra for the cipherCheck
-        int numberOfAgents = (this.keyLength / 8) + 16;
+        int numberOfAgents = this.keyLength / 8;
         for (int i = 0; i < numberOfAgents; i++) {
-            this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents-1));
+            this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1));
         }
-        
-        this.BuildKey();
+
+        this.buildKey();
     }
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="Methods">
-    private void BuildKey() {
+    private void buildKey() {
         this.lastGeneratedKey = new byte[(this.keyLength / 8)];
-        this.lastGeneratedIV= new byte[16];
-        
+
         for (int i = 0; i < (this.keyLength / 8); i++) {
-            this.lastGeneratedKey[i] = ((Agent)this.agents.get(i)).getKeyPart();
-        }
-        
-        for (int i = 0; i < 16; i++) {
-            this.lastGeneratedIV[i] = ((Agent)this.agents.get((this.agents.size() -1) - i)).getKeyPart();
+            this.lastGeneratedKey[i] = ((Agent) this.agents.get(i)).getKeyPart();
         }
     }
     //</editor-fold>

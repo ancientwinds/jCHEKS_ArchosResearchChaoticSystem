@@ -73,7 +73,7 @@ public class Agent {
         return (RuleSet)this.ruleSets.get(this.keyPart);
     }
     
-    public void RegisterImpact(int impact, int delay){
+    public void registerImpact(int impact, int delay){
         if (!this.pendingImpacts.containsKey(delay)) {
             this.pendingImpacts.put(delay, 0);
         }
@@ -81,10 +81,10 @@ public class Agent {
         this.pendingImpacts.put(delay, (int)this.pendingImpacts.get(delay) + impact);
     }
     
-    public void SendImpacts(ChaoticSystem system) {
+    public void sendImpacts(ChaoticSystem system) {
         this.getCurrentRuleSet().getRules().stream().forEach((r) -> {
             try {
-                ((Agent)system.getAgents().get(r.getDestination())).RegisterImpact(r.getImpact(), r.getDelay());
+                ((Agent)system.getAgents().get(r.getDestination())).registerImpact(r.getImpact(), r.getDelay());
             } catch (Exception e) {
                 //
             }
@@ -93,7 +93,7 @@ public class Agent {
         this.keyPart += this.getCurrentRuleSet().getSelfImpact();
     }
     
-    public void Evolve(int factor, int maxImpact) {
+    public void evolve(int factor, int maxImpact) {
         this.keyPart += (int)this.pendingImpacts.get(0);
         
         if (factor != 0) {
@@ -117,7 +117,7 @@ public class Agent {
         }
     }
     
-    public String Serialize() {
+    public String serialize() {
         StringBuilder sb = new StringBuilder();
         
         sb.append(String.valueOf(this.agentId));
@@ -127,7 +127,7 @@ public class Agent {
         sb.append("@");       
         this.ruleSets.entrySet().stream().forEach((rs) -> {
             sb.append("S");
-            sb.append(((RuleSet)rs.getValue()).Serialize());
+            sb.append(((RuleSet)rs.getValue()).serialize());
         });
         
         sb.append("@");

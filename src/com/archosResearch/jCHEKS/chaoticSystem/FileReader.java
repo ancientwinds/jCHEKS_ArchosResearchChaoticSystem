@@ -59,7 +59,7 @@ public class FileReader {
         } else if(extension.equals("sre")) {
             try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(fileToSave), "utf-8"))) {
-                writer.write(system.Serialize());         
+                writer.write(system.serialize());         
             }
         }
     }

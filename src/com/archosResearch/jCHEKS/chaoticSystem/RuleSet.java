@@ -31,7 +31,7 @@ public class RuleSet {
     
     //<editor-fold defaultstate="collapsed" desc="Constructors">
     public RuleSet(int level, int maxImpact, int ruleCount, int agentCount) {
-        this.InitializeLists();
+        this.initializeLists();
         
         this.level = level;
         this.selfImpact = Utils.GetRandomInt(maxImpact);
@@ -47,7 +47,7 @@ public class RuleSet {
     }
     
     public RuleSet(String serialization) {
-        this.InitializeLists();
+        this.initializeLists();
         
         String[] values = serialization.split("/");
         
@@ -63,7 +63,7 @@ public class RuleSet {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Methods">
-    public String Serialize() {
+    public String serialize() {
         StringBuilder sb = new StringBuilder();
         
         sb.append(String.valueOf(this.selfImpact));
@@ -73,13 +73,13 @@ public class RuleSet {
         
         this.rules.stream().forEach((r) -> {
             sb.append("R");
-            sb.append(r.Serialize());
+            sb.append(r.serialize());
         });
         
         return sb.toString();
     }
     
-    private void InitializeLists(){
+    private void initializeLists(){
         this.rules = new ArrayList<>();
     }
     //</editor-fold>

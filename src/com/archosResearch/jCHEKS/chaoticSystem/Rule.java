@@ -55,7 +55,7 @@ public class Rule {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Methods">
-    public String Serialize() {
+    public String serialize() {
         StringBuilder sb = new StringBuilder();
         
         sb.append(String.valueOf(this.destination));
