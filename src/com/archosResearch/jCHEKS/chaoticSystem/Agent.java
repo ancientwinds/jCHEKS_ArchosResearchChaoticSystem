@@ -9,12 +9,12 @@ import java.util.Map.Entry;
  *
  * @author jean-francois
  */
-public class Agent {
+public class Agent implements Cloneable{
     //<editor-fold defaultstate="collapsed" desc="Properties">
     private int agentId;
     private int keyPart;
     private HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
-    private HashMap<Integer, Object> ruleSets = new HashMap<>();
+    private HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Accessors">
@@ -30,7 +30,7 @@ public class Agent {
         return this.pendingImpacts;
     }
     
-    public HashMap<Integer, Object> getRuleSets() {
+    public HashMap<Integer, RuleSet> getRuleSets() {
         return this.ruleSets;
     }
     //</editor-fold>
@@ -66,6 +66,27 @@ public class Agent {
             }
         }
     }
+    
+    @Override
+    public Agent clone() throws CloneNotSupportedException{
+        Agent agentClone = (Agent)super.clone();
+        agentClone.agentId = this.agentId;
+        agentClone.keyPart = this.keyPart;
+        agentClone.pendingImpacts = new HashMap();
+        for(Entry<Integer, Integer> entrySet : this.pendingImpacts.entrySet()) {
+            Integer key = entrySet.getKey();
+            Integer value = entrySet.getValue();
+            agentClone.pendingImpacts.put(key, value);
+        }
+        agentClone.ruleSets = new HashMap();
+        for (Entry<Integer, RuleSet> entrySet : ruleSets.entrySet()) {
+            Integer key = entrySet.getKey();
+            RuleSet value = entrySet.getValue();
+            agentClone.ruleSets.put(key, value.clone());
+        }
+        
+        return agentClone;
+    } 
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Methods">
@@ -86,7 +107,7 @@ public class Agent {
             try {
                 ((Agent)system.getAgents().get(r.getDestination())).registerImpact(r.getImpact(), r.getDelay());
             } catch (Exception e) {
-                //
+                //TODO Create new Exception
             }
         });
         

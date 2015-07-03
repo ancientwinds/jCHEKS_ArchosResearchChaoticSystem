@@ -1,9 +1,16 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
+import com.archosResearch.jCHEKS.chaoticSystem.exception.KeyLenghtException;
+import com.archosResearch.jCHEKS.chaoticSystem.exception.KeyGenerationException;
+import com.archosResearch.jCHEKS.chaoticSystem.exception.CloningException;
+import com.archosResearch.jCHEKS.chaoticSystem.exception.XMLSerializationException;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -13,13 +20,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 //</editor-fold>
 
 /**
  *
  * @author jean-francois
  */
-public class ChaoticSystem extends AbstractChaoticSystem {
+public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
     //<editor-fold defaultstate="collapsed" desc="Properties">
     private HashMap<Integer, Agent> agents = new HashMap();
@@ -36,7 +44,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
-    public ChaoticSystem(int keyLength) throws Exception {
+    public ChaoticSystem(int keyLength) throws KeyLenghtException{
         super(keyLength);
         this.generateSystem(this.keyLength);
     }
@@ -60,30 +68,36 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     }
 
     @Override
-    public byte[] getKey(int requiredBitLength) throws Exception {
+    public byte[] getKey(int requiredBitLength) throws KeyLenghtException, KeyGenerationException{
         if (requiredBitLength % Byte.SIZE == 0) {
             return generateByteKey(requiredBitLength / Byte.SIZE);
         }
-        throw new Exception();
+        throw new KeyLenghtException("Invalid key length. Must be a multiple of 8.");
     }
 
-    private byte[] generateByteKey(int requiredByteLength) throws Exception {
-        this.toGenerateKey = new byte[requiredByteLength];
-        if (requiredByteLength >= this.lastGeneratedKey.length - this.lastGeneratedKeyIndex) {
-            this.toGenerateKeyIndex = 0;
-            setClone();
-            pickCloneKey();
-            while (this.toGenerateKeyIndex < requiredByteLength) {
-                fillKey();
-                if (this.toGenerateKeyIndex < requiredByteLength - 1) {
-                    evolveClone();
+    private byte[] generateByteKey(int requiredByteLength) throws KeyGenerationException {
+        try {
+            this.toGenerateKey = new byte[requiredByteLength];
+            if (requiredByteLength >= this.lastGeneratedKey.length - this.lastGeneratedKeyIndex) {
+
+                this.toGenerateKeyIndex = 0;
+                setClone();
+                pickCloneKey();
+                while (this.toGenerateKeyIndex < requiredByteLength) {
+                    fillKey();
+                    if (this.toGenerateKeyIndex < requiredByteLength - 1) {
+                        evolveClone();
+                    }
                 }
+
+            } else {
+                copyBytesFromLastToNextKey(requiredByteLength);
+                this.lastGeneratedKeyIndex += requiredByteLength;
             }
-        } else {
-            copyBytesFromLastToNextKey(requiredByteLength);
-            this.lastGeneratedKeyIndex += requiredByteLength;
+            return this.toGenerateKey;
+        } catch (CloningException ex) {
+            throw new KeyGenerationException("Error in key generation process.", ex);
         }
-        return this.toGenerateKey;
     }
 
     private void copyBytesFromLastToNextKey(int numberOfBytesToCopy) {
@@ -112,7 +126,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         this.lastGeneratedKey = this.currentClone.getKey();
     }
 
-    private void setClone() throws Exception {
+    private void setClone() throws CloningException {
         this.currentClone = (this.currentClone == null) ? cloneSystem() : this.currentClone;
     }
 
@@ -123,13 +137,30 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     }
 
     @Override
-    public ChaoticSystem cloneSystem() throws Exception {
+    public ChaoticSystem clone() throws CloneNotSupportedException {
+        ChaoticSystem chaoticSystemClone = (ChaoticSystem) super.clone();
+        chaoticSystemClone.keyLength = this.keyLength;
+        chaoticSystemClone.agents = new HashMap();
+        for (Map.Entry<Integer, Agent> entrySet : this.agents.entrySet()) {
+            Integer key = entrySet.getKey();
+            Agent value = entrySet.getValue();
+            chaoticSystemClone.agents.put(key, (Agent) value.clone());
+        }
+        return chaoticSystemClone;
+    }
+
+    @Override
+    public ChaoticSystem cloneSystem() throws CloningException {
         try {
+            return this.clone();
+            
+            /* Other way to do it.
             ChaoticSystem system = new ChaoticSystem(this.keyLength);
             system.Deserialize(this.serialize());
             return system;
-        } catch (Exception ex) {
-            throw new Exception("Error during the cloning process", ex);
+            */
+        } catch (CloneNotSupportedException ex) {
+            throw new CloningException("Unable to clone system.", ex);
         }
 
     }
@@ -168,29 +199,33 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         }
     }
 
-    public void deserializeXML(File xmlFile) throws Exception {
+    public void deserializeXML(File xmlFile) throws XMLSerializationException{
 
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(xmlFile);
-        doc.getDocumentElement().normalize();
-        this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
-        this.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
-
-        this.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
-
-        NodeList nList = doc.getElementsByTagName("agent");
-        this.agents = new HashMap();
-
-        for(int i = 0; i < nList.getLength(); i++) {
-            Node element = nList.item(i);
-            Agent tempAgent = new Agent(element.getTextContent());
-            this.agents.put(tempAgent.getAgentId(), tempAgent);
-
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(xmlFile);
+            doc.getDocumentElement().normalize();
+            this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
+            this.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
+            
+            this.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
+            
+            NodeList nList = doc.getElementsByTagName("agent");
+            this.agents = new HashMap();
+            
+            for (int i = 0; i < nList.getLength(); i++) {
+                Node element = nList.item(i);
+                Agent tempAgent = new Agent(element.getTextContent());
+                this.agents.put(tempAgent.getAgentId(), tempAgent);
+                
+            }
+        } catch (ParserConfigurationException | SAXException | IOException ex) {
+            throw new XMLSerializationException("Error deserializing xml.", ex);
         }
     }
 
-    public Document serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
+    public Document serializeXML() throws XMLSerializationException {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -223,20 +258,20 @@ public class ChaoticSystem extends AbstractChaoticSystem {
 
             return doc;
         } catch (ParserConfigurationException ex) {
-            throw new Exception("Error serializing XML", ex);
+            throw new XMLSerializationException("Error serializing XML", ex);
         }
     }
 
     @Override
-    public final void generateSystem(int keyLength) throws Exception {
+    public final void generateSystem(int keyLength) throws KeyLenghtException{
         this.keyLength = keyLength;
 
         if ((this.keyLength % 128) != 0) {
-            throw new Exception("Invalid key length. Must be a multiple of 128.");
+            throw new KeyLenghtException("Invalid key length. Must be a multiple of 128.");
         }
 
         //TODO We might want another extra for the cipherCheck
-        int numberOfAgents = this.keyLength / 8;
+        int numberOfAgents = this.keyLength / Byte.SIZE;
         for (int i = 0; i < numberOfAgents; i++) {
             this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1));
         }
