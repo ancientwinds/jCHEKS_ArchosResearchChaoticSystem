@@ -45,6 +45,13 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         super(keyLength, systemId);
         this.generateSystem(this.keyLength);
     }
+    
+    public ChaoticSystem(int keyLength, String systemId, String seed) throws Exception {
+        super(keyLength, systemId);
+        Utils.setSeed(seed);
+        this.generateSystem(this.keyLength);
+        Utils.resetSeed();
+    }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
