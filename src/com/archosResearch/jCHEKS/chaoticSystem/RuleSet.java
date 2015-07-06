@@ -2,6 +2,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 //</editor-fold>
@@ -93,6 +94,33 @@ public class RuleSet implements Cloneable {
         });
 
         return sb.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 61 * hash + this.level;
+        hash = 61 * hash + this.selfImpact;
+        hash = 61 * hash + Objects.hashCode(this.rules);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RuleSet other = (RuleSet) obj;
+        if (this.level != other.level) {
+            return false;
+        }
+        if (this.selfImpact != other.selfImpact) {
+            return false;
+        }
+        return Objects.equals(this.rules, other.rules);
     }
 
     private void initializeLists() {

@@ -46,4 +46,24 @@ public class ChaoticSystemTest {
         assertEquals(system.getKey(80).length, 10);
         assertEquals(system.getKey(800).length, 100);
     }
+    
+    @Test
+    public void clones_must_be_equals()throws Exception {
+        ChaoticSystem system = new ChaoticSystem(128);
+        assertTrue(system.equals(system.clone()));
+    }
+    @Test
+    public void clone_stay_in_sync()throws Exception {
+        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem clone = system.clone();
+        system.evolveSystem();
+        
+        assertFalse(system.equals(clone));
+    }
+    @Test
+    public void hashcodes_of_clones_must_be_equals()throws Exception {
+        ChaoticSystem system = new ChaoticSystem(128);
+        
+        assertEquals(system.hashCode(),system.clone().hashCode());
+    }
 }
