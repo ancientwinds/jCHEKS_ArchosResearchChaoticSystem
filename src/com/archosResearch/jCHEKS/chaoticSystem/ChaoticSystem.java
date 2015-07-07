@@ -3,19 +3,14 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 //<editor-fold defaultstate="collapsed" desc="Imports">
 import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import java.io.*;
+import java.util.HashMap;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import org.xml.sax.InputSource;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.*;
 //</editor-fold>
 
 /**
@@ -24,22 +19,19 @@ import org.xml.sax.SAXException;
  */
 public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
-    //<editor-fold defaultstate="collapsed" desc="Properties">
     private HashMap<Integer, Agent> agents = new HashMap();
     private int lastGeneratedKeyIndex;
     private AbstractChaoticSystem currentClone;
     private byte[] toGenerateKey;
     private int toGenerateKeyIndex;
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Accessors">
     public HashMap<Integer, Agent> getAgents() {
         return this.agents;
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Constructors">
-    public ChaoticSystem(int keyLength) throws KeyLenghtException{
+    protected ChaoticSystem() {}
+    
+    public ChaoticSystem(int keyLength) throws Exception {
         super(keyLength);
         this.generateSystem(this.keyLength);
     }
@@ -55,9 +47,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         this.generateSystem(this.keyLength);
         Utils.resetSeed();
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
     @Override
     public void evolveSystem(int factor) {
         
@@ -109,7 +99,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             
             /* Other way to do it.
             ChaoticSystem system = new ChaoticSystem(this.keyLength);
-            system.Deserialize(this.serialize());
+            system.deserialize(this.serialize());
             return system;
             */
         } catch (CloneNotSupportedException ex) {
@@ -137,7 +127,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     }
 
     @Override
-    public void Deserialize(String serialization) {
+    public void deserialize(String serialization) {
         String[] values = serialization.split("!");
 
         this.systemId = values[0];
@@ -152,33 +142,33 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         }
     }
 
-    public void deserializeXML(File xmlFile) throws XMLSerializationException{
+    public static ChaoticSystem deserializeXML(String xml) throws Exception {
 
-        try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(xmlFile);
-            doc.getDocumentElement().normalize();
-            this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
-            this.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
-            
-            this.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
-            
-            NodeList nList = doc.getElementsByTagName("agent");
-            this.agents = new HashMap();
-            
-            for (int i = 0; i < nList.getLength(); i++) {
-                Node element = nList.item(i);
-                Agent tempAgent = new Agent(element.getTextContent());
-                this.agents.put(tempAgent.getAgentId(), tempAgent);
-                
-            }
-        } catch (ParserConfigurationException | SAXException | IOException ex) {
-            throw new XMLSerializationException("Error deserializing xml.", ex);
+        ChaoticSystem system = new ChaoticSystem();
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        InputSource is = new InputSource(new StringReader(xml));
+        Document doc = dBuilder.parse(is);
+        
+        doc.getDocumentElement().normalize();
+        system.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
+        system.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
+
+        system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
+
+        NodeList nList = doc.getElementsByTagName("agent");
+        system.agents = new HashMap();
+
+        for(int i = 0; i < nList.getLength(); i++) {
+            Node element = nList.item(i);
+            Agent tempAgent = new Agent(element.getTextContent());
+            system.agents.put(tempAgent.getAgentId(), tempAgent);
         }
+        
+        return system;
     }
 
-    public Document serializeXML() throws XMLSerializationException {
+    public String serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -208,8 +198,15 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             });
 
             rootElement.appendChild(agentsElement);
-
-            return doc;
+            
+            DOMSource domSource = new DOMSource(doc);
+            StringWriter writer = new StringWriter();
+            StreamResult result = new StreamResult(writer);
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            transformer.transform(domSource, result);
+            
+            return writer.toString();
         } catch (ParserConfigurationException ex) {
             throw new XMLSerializationException("Error serializing XML", ex);
         }
@@ -231,7 +228,6 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
         this.buildKey();
     }
-    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Methods">
 
@@ -319,5 +315,4 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             this.lastGeneratedKey[i] = ((Agent) this.agents.get(i)).getKeyPart();
         }
     }
-    //</editor-fold>
 }
