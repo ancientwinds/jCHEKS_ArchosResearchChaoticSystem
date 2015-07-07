@@ -1,6 +1,7 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
+import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.*;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import org.w3c.dom.*;
  *
  * @author jean-francois
  */
-public class ChaoticSystem extends AbstractChaoticSystem {
+public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
     private HashMap<Integer, Agent> agents = new HashMap();
     private int lastGeneratedKeyIndex;
@@ -49,6 +50,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
 
     @Override
     public void evolveSystem(int factor) {
+        
         this.agents.entrySet().stream().forEach((a) -> {
             ((Agent) a.getValue()).sendImpacts(this);
         });
@@ -56,7 +58,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         this.agents.entrySet().stream().forEach((a) -> {
             ((Agent) a.getValue()).evolve(factor, this.maxImpact);
         });
-
+        
         this.buildKey();
         this.currentClone = null;
         this.lastGeneratedKeyIndex = 0;
@@ -64,62 +66,13 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     }
 
     @Override
-    public byte[] getKey(int requiredBitLength) throws Exception {
+    public byte[] getKey(int requiredBitLength) throws KeyLenghtException, KeyGenerationException{
         if (requiredBitLength % Byte.SIZE == 0) {
             return generateByteKey(requiredBitLength / Byte.SIZE);
         }
-        throw new Exception();
+        throw new KeyLenghtException("Invalid key length. Must be a multiple of 8.");
     }
-
-    private byte[] generateByteKey(int requiredByteLength) throws Exception {
-        this.toGenerateKey = new byte[requiredByteLength];
-        if (requiredByteLength >= this.lastGeneratedKey.length - this.lastGeneratedKeyIndex) {
-            this.toGenerateKeyIndex = 0;
-            setClone();
-            pickCloneKey();
-            while (this.toGenerateKeyIndex < requiredByteLength) {
-                fillKey();
-                if (this.toGenerateKeyIndex < requiredByteLength - 1) {
-                    evolveClone();
-                }
-            }
-        } else {
-            copyBytesFromLastToNextKey(requiredByteLength);
-            this.lastGeneratedKeyIndex += requiredByteLength;
-        }
-        return this.toGenerateKey;
-    }
-
-    private void copyBytesFromLastToNextKey(int numberOfBytesToCopy) {
-        System.arraycopy(this.lastGeneratedKey, lastGeneratedKeyIndex, this.toGenerateKey, this.toGenerateKeyIndex, numberOfBytesToCopy);
-    }
-
-    private void fillKey() {
-        int numberOfByteToCopy = getNumberOfByteToCopy(this.toGenerateKey.length, this.toGenerateKeyIndex);
-        copyBytesFromLastToNextKey(numberOfByteToCopy);
-        this.toGenerateKeyIndex += numberOfByteToCopy;
-        this.lastGeneratedKeyIndex += numberOfByteToCopy;
-    }
-
-    private int getNumberOfByteToCopy(int requiredLength, int fullKeyIndex) {
-        int numberOfMissingBytes = requiredLength - fullKeyIndex;
-        return (this.lastGeneratedKey.length - this.lastGeneratedKeyIndex > numberOfMissingBytes) ? numberOfMissingBytes : this.lastGeneratedKey.length - lastGeneratedKeyIndex;
-    }
-
-    private void evolveClone() {
-        this.currentClone.evolveSystem();
-        this.lastGeneratedKey = this.currentClone.getKey();
-        this.lastGeneratedKeyIndex = 0;
-    }
-
-    private void pickCloneKey() {
-        this.lastGeneratedKey = this.currentClone.getKey();
-    }
-
-    private void setClone() throws Exception {
-        this.currentClone = (this.currentClone == null) ? cloneSystem() : this.currentClone;
-    }
-
+    
     @Override
     public void resetSystem() {
         // TODO : Demander à François ce qu'il voyait là-dedans!
@@ -127,13 +80,30 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     }
 
     @Override
-    public ChaoticSystem cloneSystem() throws Exception {
+    public ChaoticSystem clone() throws CloneNotSupportedException {
+        ChaoticSystem chaoticSystemClone = (ChaoticSystem) super.clone();
+        
+        chaoticSystemClone.agents = new HashMap();
+        for (Map.Entry<Integer, Agent> entrySet : this.agents.entrySet()) {
+            Integer key = entrySet.getKey();
+            Agent value = entrySet.getValue();
+            chaoticSystemClone.agents.put(key, (Agent) value.clone());
+        }
+        return chaoticSystemClone;
+    }
+
+    @Override
+    public ChaoticSystem cloneSystem() throws CloningException {
         try {
+            return this.clone();
+            
+            /* Other way to do it.
             ChaoticSystem system = new ChaoticSystem(this.keyLength);
             system.deserialize(this.serialize());
             return system;
-        } catch (Exception ex) {
-            throw new Exception("Error during the cloning process", ex);
+            */
+        } catch (CloneNotSupportedException ex) {
+            throw new CloningException("Unable to clone system.", ex);
         }
 
     }
@@ -238,20 +208,20 @@ public class ChaoticSystem extends AbstractChaoticSystem {
             
             return writer.toString();
         } catch (ParserConfigurationException ex) {
-            throw new Exception("Error serializing XML", ex);
+            throw new XMLSerializationException("Error serializing XML", ex);
         }
     }
 
     @Override
-    public final void generateSystem(int keyLength) throws Exception {
+    public final void generateSystem(int keyLength) throws KeyLenghtException{
         this.keyLength = keyLength;
 
         if ((this.keyLength % 128) != 0) {
-            throw new Exception("Invalid key length. Must be a multiple of 128.");
+            throw new KeyLenghtException("Invalid key length. Must be a multiple of 128.");
         }
 
         //TODO We might want another extra for the cipherCheck
-        int numberOfAgents = this.keyLength / 8;
+        int numberOfAgents = this.keyLength / Byte.SIZE;
         for (int i = 0; i < numberOfAgents; i++) {
             this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1));
         }
@@ -259,10 +229,89 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         this.buildKey();
     }
 
-    private void buildKey() {
-        this.lastGeneratedKey = new byte[(this.keyLength / 8)];
+    //<editor-fold defaultstate="collapsed" desc="Methods">
 
-        for (int i = 0; i < (this.keyLength / 8); i++) {
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 59 * hash + Objects.hashCode(this.agents);
+        return hash;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ChaoticSystem other = (ChaoticSystem) obj;
+        if (!Objects.equals(this.agents, other.agents)) {
+            return false;
+        }
+        return true;
+    }
+    
+    private byte[] generateByteKey(int requiredByteLength) throws KeyGenerationException {
+        try {
+            this.toGenerateKey = new byte[requiredByteLength];
+            if (requiredByteLength >= this.lastGeneratedKey.length - this.lastGeneratedKeyIndex) {
+
+                this.toGenerateKeyIndex = 0;
+                setClone();
+                pickCloneKey();
+                while (this.toGenerateKeyIndex < requiredByteLength) {
+                    fillKey();
+                    if (this.toGenerateKeyIndex < requiredByteLength - 1) {
+                        evolveClone();
+                    }
+                }
+
+            } else {
+                copyBytesFromLastToNextKey(requiredByteLength);
+                this.lastGeneratedKeyIndex += requiredByteLength;
+            }
+            return this.toGenerateKey;
+        } catch (CloningException ex) {
+            throw new KeyGenerationException("Error in key generation process.", ex);
+        }
+    }
+
+    private void copyBytesFromLastToNextKey(int numberOfBytesToCopy) {
+        System.arraycopy(this.lastGeneratedKey, lastGeneratedKeyIndex, this.toGenerateKey, this.toGenerateKeyIndex, numberOfBytesToCopy);
+    }
+
+    private void fillKey() {
+        int numberOfByteToCopy = getNumberOfByteToCopy(this.toGenerateKey.length, this.toGenerateKeyIndex);
+        copyBytesFromLastToNextKey(numberOfByteToCopy);
+        this.toGenerateKeyIndex += numberOfByteToCopy;
+        this.lastGeneratedKeyIndex += numberOfByteToCopy;
+    }
+
+    private int getNumberOfByteToCopy(int requiredLength, int fullKeyIndex) {
+        int numberOfMissingBytes = requiredLength - fullKeyIndex;
+        return (this.lastGeneratedKey.length - this.lastGeneratedKeyIndex > numberOfMissingBytes) ? numberOfMissingBytes : this.lastGeneratedKey.length - lastGeneratedKeyIndex;
+    }
+
+    private void evolveClone() {
+        this.currentClone.evolveSystem();
+        this.lastGeneratedKey = this.currentClone.getKey();
+        this.lastGeneratedKeyIndex = 0;
+    }
+
+    private void pickCloneKey() {
+        this.lastGeneratedKey = this.currentClone.getKey();
+    }
+
+    private void setClone() throws CloningException {
+        this.currentClone = (this.currentClone == null) ? cloneSystem() : this.currentClone;
+    }
+    
+    private void buildKey() {
+        this.lastGeneratedKey = new byte[(this.keyLength / Byte.SIZE)];
+
+        for (int i = 0; i < (this.keyLength / Byte.SIZE); i++) {
             this.lastGeneratedKey[i] = ((Agent) this.agents.get(i)).getKeyPart();
         }
     }

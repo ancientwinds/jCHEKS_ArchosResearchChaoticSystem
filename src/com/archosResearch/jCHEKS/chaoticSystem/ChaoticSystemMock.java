@@ -19,7 +19,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
-    public ChaoticSystemMock() throws Exception {
+    public ChaoticSystemMock(){
         super(128);
         
         this.keyPointer = 0;
@@ -43,8 +43,12 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     
     @Override
     public byte[] getKey(int requiredLength) {
-        try {
-            byte[] fullKey = new byte[0];
+        byte[] fullKey = new byte[0];
+        
+        ChaoticSystemMock clone = this.cloneSystem();
+        
+        do {
+            byte[] keyPart = clone.getKey();
             
             ChaoticSystemMock clone = this.cloneSystem();
             
@@ -70,13 +74,8 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     }
     
     @Override
-    public ChaoticSystemMock cloneSystem() {
-        try {
-            return new ChaoticSystemMock();
-        } catch (Exception ex) {
-            Logger.getLogger(ChaoticSystemMock.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+    public ChaoticSystemMock cloneSystem(){
+        return new ChaoticSystemMock();
     } 
     
     @Override
@@ -102,7 +101,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     }
     
     @Override
-    protected void generateSystem(int keyLength) {
+    protected void generateSystem(int keyLength){
        this.keyLength = 128;
        this.lastGeneratedKey = this.keyList.get(keyPointer);
     }

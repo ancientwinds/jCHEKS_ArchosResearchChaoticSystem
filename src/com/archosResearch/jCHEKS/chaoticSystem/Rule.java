@@ -4,7 +4,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
  *
  * @author jean-francois
  */
-public class Rule {
+public class Rule implements Cloneable{
     //<editor-fold defaultstate="collapsed" desc="Properties">
     private int destination;
     private int impact;
@@ -53,8 +53,43 @@ public class Rule {
         
     }
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="Methods">
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Rule other = (Rule) obj;
+        if (this.destination != other.destination) {
+            return false;
+        }
+        if (this.impact != other.impact) {
+            return false;
+        }
+        if (this.delay != other.delay) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 47 * hash + this.destination;
+        hash = 47 * hash + this.impact;
+        hash = 47 * hash + this.delay;
+        return hash;
+    }
+    
+    @Override
+    public Rule clone() throws CloneNotSupportedException{
+        return (Rule)super.clone();
+    }
+    
     public String serialize() {
         StringBuilder sb = new StringBuilder();
         
