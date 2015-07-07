@@ -5,20 +5,9 @@
  */
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Document;
+import java.nio.file.*;
 
 /**
  *
@@ -35,7 +24,7 @@ public class FileReader {
         ChaoticSystem system = new ChaoticSystem(128);
         String extension = this.getFileExtension(fileToSave);
         if(extension.equals("xml")) {            
-            system.deserializeXML(new File(fileToSave));
+            system.deserializeXML(readFile(fileToSave, null));
             return system;
         } else if(extension.equals("sre")) {
             system.deserialize(readFile(fileToSave, null));
@@ -49,19 +38,18 @@ public class FileReader {
         dir.mkdirs();
         String fileToSave = chaoticSystemDir + fileName;
         String extension = this.getFileExtension(fileToSave);
+        String serialized = "";
+        
         if(extension.equals("xml")) {
-            Document doc = system.serializeXML();
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File(fileToSave));
-            transformer.transform(source, result);
+            serialized = system.serializeXML();
         } else if(extension.equals("sre")) {
-            try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(fileToSave), "utf-8"))) {
-                writer.write(system.serialize());         
-            }
+            serialized = system.serialize();
         }
+        
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(fileToSave), "utf-8"))) {
+                writer.write(serialized);         
+            }
     }
     
     static String readFile(String path, Charset encoding) throws IOException 

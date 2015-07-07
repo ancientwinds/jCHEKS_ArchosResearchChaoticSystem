@@ -2,17 +2,14 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
-import java.io.File;
-import java.util.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.io.*;
+import java.util.HashMap;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import org.xml.sax.InputSource;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.*;
 //</editor-fold>
 
 /**
@@ -180,11 +177,13 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         }
     }
 
-    public void deserializeXML(File xmlFile) throws Exception {
+    public void deserializeXML(String xml) throws Exception {
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(xmlFile);
+        InputSource is = new InputSource(new StringReader(xml));
+        Document doc = dBuilder.parse(is);
+        
         doc.getDocumentElement().normalize();
         this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
         this.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
@@ -202,7 +201,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         }
     }
 
-    public Document serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
+    public String serializeXML() throws TransformerConfigurationException, TransformerException, Exception {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -232,8 +231,15 @@ public class ChaoticSystem extends AbstractChaoticSystem {
             });
 
             rootElement.appendChild(agentsElement);
-
-            return doc;
+            
+            DOMSource domSource = new DOMSource(doc);
+            StringWriter writer = new StringWriter();
+            StreamResult result = new StreamResult(writer);
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            transformer.transform(domSource, result);
+            
+            return writer.toString();
         } catch (ParserConfigurationException ex) {
             throw new Exception("Error serializing XML", ex);
         }
