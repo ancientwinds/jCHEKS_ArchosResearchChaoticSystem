@@ -33,6 +33,8 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
+    protected ChaoticSystem() {}
+    
     public ChaoticSystem(int keyLength) throws Exception {
         super(keyLength);
         this.generateSystem(this.keyLength);
@@ -49,6 +51,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         this.generateSystem(this.keyLength);
         Utils.resetSeed();
     }
+
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
@@ -177,28 +180,30 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         }
     }
 
-    public void deserializeXML(String xml) throws Exception {
+    public static ChaoticSystem deserializeXML(String xml) throws Exception {
 
+        ChaoticSystem system = new ChaoticSystem();
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         InputSource is = new InputSource(new StringReader(xml));
         Document doc = dBuilder.parse(is);
         
         doc.getDocumentElement().normalize();
-        this.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
-        this.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
+        system.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
+        system.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
 
-        this.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
+        system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
 
         NodeList nList = doc.getElementsByTagName("agent");
-        this.agents = new HashMap();
+        system.agents = new HashMap();
 
         for(int i = 0; i < nList.getLength(); i++) {
             Node element = nList.item(i);
             Agent tempAgent = new Agent(element.getTextContent());
-            this.agents.put(tempAgent.getAgentId(), tempAgent);
-
+            system.agents.put(tempAgent.getAgentId(), tempAgent);
         }
+        
+        return system;
     }
 
     public String serializeXML() throws TransformerConfigurationException, TransformerException, Exception {

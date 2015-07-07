@@ -5,6 +5,7 @@
  */
 package com.archosResearch.jCHEKS.chaoticSystem;
 
+import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.*;
@@ -17,20 +18,22 @@ public class FileReader {
     
     private static final String chaoticSystemDir = "system/";
     
-    public static ChaoticSystem readChaoticSystem(String fileName) throws Exception {
+    public static AbstractChaoticSystem readChaoticSystem(String fileName) throws Exception {
         File dir = new File(chaoticSystemDir);
         dir.mkdirs();
         String fileToSave = chaoticSystemDir + fileName;
-        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem system;
         String extension = getFileExtension(fileToSave);
         if(extension.equals("xml")) {            
-            system.deserializeXML(readFile(fileToSave, null));
-            return system;
+            system = ChaoticSystem.deserializeXML(readFile(fileToSave, null));
         } else if(extension.equals("sre")) {
+            system = new ChaoticSystem();
             system.deserialize(readFile(fileToSave, null));
-            return system;  
-        }        
-        throw new Exception("File not compatible");
+        } else {
+            throw new Exception("File not compatible");
+        }  
+        
+        return system;  
     }
     
     public static void saveChaoticSystem(String fileName, ChaoticSystem system) throws Exception {
