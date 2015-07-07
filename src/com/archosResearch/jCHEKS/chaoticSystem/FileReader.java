@@ -72,7 +72,7 @@ public class FileReader {
    
     private String getFileExtension(String file) {
         String[] name = file.split("\\.");
-        return name[1];     
+        return name[name.length-1];     
     }
 
 

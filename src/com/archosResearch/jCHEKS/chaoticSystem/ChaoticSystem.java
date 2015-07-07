@@ -1,16 +1,11 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
-import com.archosResearch.jCHEKS.chaoticSystem.exception.KeyLenghtException;
-import com.archosResearch.jCHEKS.chaoticSystem.exception.KeyGenerationException;
-import com.archosResearch.jCHEKS.chaoticSystem.exception.CloningException;
-import com.archosResearch.jCHEKS.chaoticSystem.exception.XMLSerializationException;
+import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,6 +42,18 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     public ChaoticSystem(int keyLength) throws KeyLenghtException{
         super(keyLength);
         this.generateSystem(this.keyLength);
+    }
+    
+    public ChaoticSystem(int keyLength, String systemId) throws Exception {
+        super(keyLength, systemId);
+        this.generateSystem(this.keyLength);
+    }
+    
+    public ChaoticSystem(int keyLength, String systemId, String seed) throws Exception {
+        super(keyLength, systemId);
+        Utils.setSeed(seed);
+        this.generateSystem(this.keyLength);
+        Utils.resetSeed();
     }
     //</editor-fold>
 
@@ -85,8 +92,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     @Override
     public ChaoticSystem clone() throws CloneNotSupportedException {
         ChaoticSystem chaoticSystemClone = (ChaoticSystem) super.clone();
-        chaoticSystemClone.currentClone = this.currentClone;
-        chaoticSystemClone.keyLength = this.keyLength;
+        
         chaoticSystemClone.agents = new HashMap();
         for (Map.Entry<Integer, Agent> entrySet : this.agents.entrySet()) {
             Integer key = entrySet.getKey();
@@ -307,9 +313,9 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     }
     
     private void buildKey() {
-        this.lastGeneratedKey = new byte[(this.keyLength / 8)];
+        this.lastGeneratedKey = new byte[(this.keyLength / Byte.SIZE)];
 
-        for (int i = 0; i < (this.keyLength / 8); i++) {
+        for (int i = 0; i < (this.keyLength / Byte.SIZE); i++) {
             this.lastGeneratedKey[i] = ((Agent) this.agents.get(i)).getKeyPart();
         }
     }
