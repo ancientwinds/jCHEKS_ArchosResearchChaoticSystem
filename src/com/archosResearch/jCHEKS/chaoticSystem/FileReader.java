@@ -38,7 +38,7 @@ public class FileReader {
             system.deserializeXML(new File(fileToSave));
             return system;
         } else if(extension.equals("sre")) {
-            system.Deserialize(readFile(fileToSave, null));
+            system.deserialize(readFile(fileToSave, null));
             return system;  
         }        
         throw new Exception("File not compatible");

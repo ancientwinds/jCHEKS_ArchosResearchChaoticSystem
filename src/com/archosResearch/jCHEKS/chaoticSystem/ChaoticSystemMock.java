@@ -4,6 +4,8 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 //</editor-fold>
 
 /**
@@ -40,21 +42,26 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     }
     
     @Override
-    public byte[] getKey(int requiredLength) throws Exception{
-        byte[] fullKey = new byte[0];
-        
-        ChaoticSystemMock clone = this.cloneSystem();
-        
-        do {
-            byte[] keyPart = clone.getKey();
+    public byte[] getKey(int requiredLength) {
+        try {
+            byte[] fullKey = new byte[0];
             
-            fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
-            System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
+            ChaoticSystemMock clone = this.cloneSystem();
             
-            clone.evolveSystem();
-        } while (fullKey.length < requiredLength);
-        
-        return fullKey;
+            do {
+                byte[] keyPart = clone.getKey();
+                
+                fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
+                System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
+                
+                clone.evolveSystem();
+            } while (fullKey.length < requiredLength);
+            
+            return fullKey;
+        } catch (Exception ex) {
+            Logger.getLogger(ChaoticSystemMock.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
     
     @Override
@@ -63,8 +70,13 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     }
     
     @Override
-    public ChaoticSystemMock cloneSystem() throws Exception{
-        return new ChaoticSystemMock();
+    public ChaoticSystemMock cloneSystem() {
+        try {
+            return new ChaoticSystemMock();
+        } catch (Exception ex) {
+            Logger.getLogger(ChaoticSystemMock.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     } 
     
     @Override
@@ -81,7 +93,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     }
     
     @Override
-    public void Deserialize(String serialization) {
+    public void deserialize(String serialization) {
         String[] values = serialization.split("!");
         
         this.systemId = values[0];
@@ -90,7 +102,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     }
     
     @Override
-    protected void generateSystem(int keyLength) throws Exception {
+    protected void generateSystem(int keyLength) {
        this.keyLength = 128;
        this.lastGeneratedKey = this.keyList.get(keyPointer);
     }

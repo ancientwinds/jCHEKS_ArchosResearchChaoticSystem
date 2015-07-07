@@ -12,7 +12,7 @@ public class ChaoticSystemTest {
         ChaoticSystemMock systemMock1 = new ChaoticSystemMock();
         ChaoticSystemMock systemMock2 = new ChaoticSystemMock();
         
-        systemMock2.Deserialize(systemMock1.serialize());
+        systemMock2.deserialize(systemMock1.serialize());
         
         assertTrue("Serialization and Deserialization of mock system", systemMock1.serialize().equals(systemMock2.serialize()));
         }
@@ -22,7 +22,7 @@ public class ChaoticSystemTest {
         ChaoticSystem system1 = new ChaoticSystem(128);
         ChaoticSystem system2 = new ChaoticSystem(128);
         
-        system2.Deserialize(system1.serialize());
+        system2.deserialize(system1.serialize());
         
         assertTrue("Serialization and Deserialization of system", system1.serialize().equals(system2.serialize()));
     }

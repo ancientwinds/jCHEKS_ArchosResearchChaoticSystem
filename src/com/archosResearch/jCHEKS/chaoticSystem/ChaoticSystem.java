@@ -138,7 +138,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     public ChaoticSystem cloneSystem() throws Exception {
         try {
             ChaoticSystem system = new ChaoticSystem(this.keyLength);
-            system.Deserialize(this.serialize());
+            system.deserialize(this.serialize());
             return system;
         } catch (Exception ex) {
             throw new Exception("Error during the cloning process", ex);
@@ -165,7 +165,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
     }
 
     @Override
-    public void Deserialize(String serialization) {
+    public void deserialize(String serialization) {
         String[] values = serialization.split("!");
 
         this.systemId = values[0];
