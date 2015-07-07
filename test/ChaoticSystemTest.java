@@ -40,7 +40,7 @@ public class ChaoticSystemTest {
     }
     
     @Test
-    public void get_two_keys_test() throws Exception {
+    public void get_three_keys_test() throws Exception {
         ChaoticSystem system = new ChaoticSystem(128);
         assertEquals(system.getKey(8).length, 1);
         assertEquals(system.getKey(80).length, 10);
@@ -57,9 +57,19 @@ public class ChaoticSystemTest {
         ChaoticSystem system = new ChaoticSystem(128);
         ChaoticSystem clone = system.clone();
         system.evolveSystem();
+        clone.evolveSystem();
+        
+        assertTrue(system.equals(clone));
+    }
+    @Test
+    public void clone_are_not_same()throws Exception {
+        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem clone = system.clone();
+        system.evolveSystem();
         
         assertFalse(system.equals(clone));
     }
+    
     @Test
     public void hashcodes_of_clones_must_be_equals()throws Exception {
         ChaoticSystem system = new ChaoticSystem(128);
