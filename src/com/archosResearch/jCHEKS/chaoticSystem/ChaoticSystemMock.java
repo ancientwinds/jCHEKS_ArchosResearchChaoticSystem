@@ -49,23 +49,14 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
         
         do {
             byte[] keyPart = clone.getKey();
-            
-            ChaoticSystemMock clone = this.cloneSystem();
-            
-            do {
-                byte[] keyPart = clone.getKey();
+          
+            fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
+            System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
                 
-                fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
-                System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
-                
-                clone.evolveSystem();
-            } while (fullKey.length < requiredLength);
+            clone.evolveSystem();
+        } while (fullKey.length < requiredLength);
             
-            return fullKey;
-        } catch (Exception ex) {
-            Logger.getLogger(ChaoticSystemMock.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+        return fullKey;        
     }
     
     @Override

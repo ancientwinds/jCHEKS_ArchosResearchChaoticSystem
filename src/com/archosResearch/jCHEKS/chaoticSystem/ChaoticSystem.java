@@ -5,6 +5,8 @@ import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.*;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import org.xml.sax.InputSource;
