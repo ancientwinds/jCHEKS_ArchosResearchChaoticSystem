@@ -17,12 +17,12 @@ public class FileReader {
     
     private static final String chaoticSystemDir = "system/";
     
-    public ChaoticSystem readChaoticSystem(String fileName) throws Exception {
+    public static ChaoticSystem readChaoticSystem(String fileName) throws Exception {
         File dir = new File(chaoticSystemDir);
         dir.mkdirs();
         String fileToSave = chaoticSystemDir + fileName;
         ChaoticSystem system = new ChaoticSystem(128);
-        String extension = this.getFileExtension(fileToSave);
+        String extension = getFileExtension(fileToSave);
         if(extension.equals("xml")) {            
             system.deserializeXML(readFile(fileToSave, null));
             return system;
@@ -33,11 +33,11 @@ public class FileReader {
         throw new Exception("File not compatible");
     }
     
-    public void saveChaoticSystem(String fileName, ChaoticSystem system) throws Exception {
+    public static void saveChaoticSystem(String fileName, ChaoticSystem system) throws Exception {
         File dir = new File(chaoticSystemDir);
         dir.mkdirs();
         String fileToSave = chaoticSystemDir + fileName;
-        String extension = this.getFileExtension(fileToSave);
+        String extension = getFileExtension(fileToSave);
         String serialized = "";
         
         if(extension.equals("xml")) {
@@ -52,13 +52,13 @@ public class FileReader {
             }
     }
     
-    static String readFile(String path, Charset encoding) throws IOException 
+    private static String readFile(String path, Charset encoding) throws IOException 
     {
       byte[] encoded = Files.readAllBytes(Paths.get(path));
       return new String(encoded, Charset.defaultCharset());
     }
    
-    private String getFileExtension(String file) {
+    private static String getFileExtension(String file) {
         String[] name = file.split("\\.");
         return name[name.length-1];     
     }
