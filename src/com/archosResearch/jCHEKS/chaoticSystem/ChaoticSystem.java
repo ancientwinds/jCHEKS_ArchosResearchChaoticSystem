@@ -18,21 +18,16 @@ import org.w3c.dom.*;
  */
 public class ChaoticSystem extends AbstractChaoticSystem {
 
-    //<editor-fold defaultstate="collapsed" desc="Properties">
     private HashMap<Integer, Agent> agents = new HashMap();
     private int lastGeneratedKeyIndex;
     private AbstractChaoticSystem currentClone;
     private byte[] toGenerateKey;
     private int toGenerateKeyIndex;
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Accessors">
     public HashMap<Integer, Agent> getAgents() {
         return this.agents;
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Constructors">
     protected ChaoticSystem() {}
     
     public ChaoticSystem(int keyLength) throws Exception {
@@ -52,9 +47,6 @@ public class ChaoticSystem extends AbstractChaoticSystem {
         Utils.resetSeed();
     }
 
-    //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
     @Override
     public void evolveSystem(int factor) {
         this.agents.entrySet().stream().forEach((a) -> {
@@ -266,9 +258,7 @@ public class ChaoticSystem extends AbstractChaoticSystem {
 
         this.buildKey();
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Methods">
     private void buildKey() {
         this.lastGeneratedKey = new byte[(this.keyLength / 8)];
 
@@ -276,5 +266,4 @@ public class ChaoticSystem extends AbstractChaoticSystem {
             this.lastGeneratedKey[i] = ((Agent) this.agents.get(i)).getKeyPart();
         }
     }
-    //</editor-fold>
 }

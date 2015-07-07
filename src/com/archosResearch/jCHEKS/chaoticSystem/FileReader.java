@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
@@ -22,8 +17,10 @@ public class FileReader {
         File dir = new File(chaoticSystemDir);
         dir.mkdirs();
         String fileToSave = chaoticSystemDir + fileName;
+        String extension = getFileExtension(fileName);
+        
         ChaoticSystem system;
-        String extension = getFileExtension(fileToSave);
+
         if(extension.equals("xml")) {            
             system = ChaoticSystem.deserializeXML(readFile(fileToSave, null));
         } else if(extension.equals("sre")) {
@@ -39,18 +36,19 @@ public class FileReader {
     public static void saveChaoticSystem(String fileName, ChaoticSystem system) throws Exception {
         File dir = new File(chaoticSystemDir);
         dir.mkdirs();
-        String fileToSave = chaoticSystemDir + fileName;
-        String extension = getFileExtension(fileToSave);
+        String extension = getFileExtension(fileName);
         String serialized = "";
         
         if(extension.equals("xml")) {
             serialized = system.serializeXML();
         } else if(extension.equals("sre")) {
             serialized = system.serialize();
-        }
+        } else {
+            throw new Exception("File not compatible");
+        } 
         
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(fileToSave), "utf-8"))) {
+                new FileOutputStream(chaoticSystemDir + fileName), "utf-8"))) {
                 writer.write(serialized);         
             }
     }
