@@ -1,11 +1,8 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
-import java.security.SecureRandom;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Random;
 //</editor-fold>
 
 /**
@@ -14,27 +11,30 @@ import java.util.logging.Logger;
  */
 public class Utils {
     public static final String DEFAULT_ENCODING = "UTF-8";
+    public static Random generator = new Random(System.currentTimeMillis());
     
     public static int GetRandomInt(int bound) {
         int result = 0;
         
-        try {
-            result = SecureRandom.getInstance("SHA1PRNG").nextInt(bound+1);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        //result = SecureRandom.getInstance("SHA1PRNG").nextInt(bound+1);
+        result = generator.nextInt(bound + 1);
+        
         return result;
+    }
+    
+    public static void setSeed(String seed) {      
+        generator = new Random(seed.hashCode());
+    }
+    
+    public static void resetSeed() {
+        generator = new Random(System.currentTimeMillis());
     }
     
     public static boolean QuarterShot() {
         int result = 0;
-        
-        try {
-            result = SecureRandom.getInstance("SHA1PRNG").nextInt(2);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+        //result = SecureRandom.getInstance("SHA1PRNG").nextInt(2);
+        result = generator.nextInt(2);
 
         return result == 0;
     }
