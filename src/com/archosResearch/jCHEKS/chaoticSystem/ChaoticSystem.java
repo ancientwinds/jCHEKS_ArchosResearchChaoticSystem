@@ -33,17 +33,17 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
     protected ChaoticSystem() {}
     
-    public ChaoticSystem(int keyLength) throws Exception {
+    public ChaoticSystem(int keyLength) throws KeyLenghtException{
         super(keyLength);
         this.generateSystem(this.keyLength);
     }
     
-    public ChaoticSystem(int keyLength, String systemId) throws Exception {
+    public ChaoticSystem(int keyLength, String systemId) throws KeyLenghtException  {
         super(keyLength, systemId);
         this.generateSystem(this.keyLength);
     }
     
-    public ChaoticSystem(int keyLength, String systemId, String seed) throws Exception {
+    public ChaoticSystem(int keyLength, String systemId, String seed) throws KeyLenghtException  {
         super(keyLength, systemId);
         Utils.setSeed(seed);
         this.generateSystem(this.keyLength);
