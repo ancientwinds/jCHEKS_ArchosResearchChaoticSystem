@@ -32,21 +32,21 @@ public class RuleSet implements Cloneable {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
-    public RuleSet(int level, int maxImpact, int ruleCount, int agentCount) {
+    public RuleSet(int level, int maxImpact, int ruleCount, int agentCount, Random random) {
         this.initializeLists();
 
         this.level = level;
-        this.selfImpact = Utils.GetRandomInt(maxImpact);
+        this.selfImpact = Utils.GetRandomInt(maxImpact, random);
         if (this.selfImpact == 0) {
             this.selfImpact++;
         }
-        if (Utils.QuarterShot()) {
+        if (Utils.QuarterShot(random)) {
             this.selfImpact *= -1;
         }
 
         // Ajouter les relations
         for (int x = 0; x < ruleCount; x++) {
-            this.rules.add(new Rule(Utils.GetRandomInt(agentCount), maxImpact));
+            this.rules.add(new Rule(Utils.GetRandomInt(agentCount, random), maxImpact, random));
         }
     }
 

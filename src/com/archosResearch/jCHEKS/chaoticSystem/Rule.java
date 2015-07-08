@@ -1,5 +1,7 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
+import java.util.Random;
+
 /**
  *
  * @author jean-francois
@@ -26,17 +28,17 @@ public class Rule implements Cloneable{
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Constructors">
-    public Rule(int destination, int maxImpact)
+    public Rule(int destination, int maxImpact, Random random)
     {
             this.destination = destination;
             
             
-            this.impact = Utils.GetRandomInt(maxImpact);
+            this.impact = Utils.GetRandomInt(maxImpact, random);
             if (this.impact == 0) this.impact++;
-            if (Utils.QuarterShot()) {
+            if (Utils.QuarterShot(random)) {
                     this.impact *= -1;
             }
-            this.delay = Utils.QuarterShot() ? 0 : Utils.GetRandomInt(3) + 1;
+            this.delay = Utils.QuarterShot(random) ? 0 : Utils.GetRandomInt(3, random) + 1;
     }
 
     /// <summary>

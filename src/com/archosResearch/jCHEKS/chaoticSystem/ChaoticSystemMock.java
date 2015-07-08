@@ -4,8 +4,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Random;
 //</editor-fold>
 
 /**
@@ -25,7 +24,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
         this.keyPointer = 0;
         
         this.InitializeMockKeys();
-        this.generateSystem(128);
+        this.generateSystem(128, null);
     }
     //</editor-fold>
     
@@ -92,7 +91,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
     }
     
     @Override
-    protected void generateSystem(int keyLength){
+    protected void generateSystem(int keyLength, Random random){
        this.keyLength = 128;
        this.lastGeneratedKey = this.keyList.get(keyPointer);
     }

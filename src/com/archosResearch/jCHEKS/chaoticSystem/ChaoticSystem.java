@@ -4,9 +4,12 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.*;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import org.xml.sax.InputSource;
@@ -35,19 +38,17 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     
     public ChaoticSystem(int keyLength) throws Exception {
         super(keyLength);
-        this.generateSystem(this.keyLength);
+        this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
     }
     
     public ChaoticSystem(int keyLength, String systemId) throws Exception {
         super(keyLength, systemId);
-        this.generateSystem(this.keyLength);
+        this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
     }
     
-    public ChaoticSystem(int keyLength, String systemId, String seed) throws Exception {
-        super(keyLength, systemId);
-        Utils.setSeed(seed);
-        this.generateSystem(this.keyLength);
-        Utils.resetSeed();
+    public ChaoticSystem(int keyLength, Random random) throws Exception {
+        super(keyLength, UUID.nameUUIDFromBytes(Integer.toString(random.nextInt()).getBytes()).toString()); 
+        this.generateSystem(this.keyLength, random);
     }
 
     @Override
@@ -215,7 +216,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     }
 
     @Override
-    public final void generateSystem(int keyLength) throws KeyLenghtException{
+    public final void generateSystem(int keyLength, Random random) throws KeyLenghtException{
         this.keyLength = keyLength;
 
         if ((this.keyLength % 128) != 0) {
@@ -225,7 +226,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         //TODO We might want another extra for the cipherCheck
         int numberOfAgents = this.keyLength / Byte.SIZE;
         for (int i = 0; i < numberOfAgents; i++) {
-            this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1));
+            this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1, random));
         }
 
         this.buildKey();
