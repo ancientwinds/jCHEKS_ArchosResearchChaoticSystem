@@ -3,13 +3,17 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 //<editor-fold defaultstate="collapsed" desc="Imports">
 import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
+import com.archosResearch.jCHEKS.concept.exception.ChaoticSystemException;
 import java.io.*;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import org.xml.sax.InputSource;
@@ -36,17 +40,24 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
     protected ChaoticSystem() {}
     
-    public ChaoticSystem(int keyLength) throws Exception {
+    public ChaoticSystem(int keyLength) throws ChaoticSystemException {
         super(keyLength);
-        this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
-    }
+        try {
+            this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
+        } catch (NoSuchAlgorithmException ex) {
+            throw new ChaoticSystemException("Can't not use the secure random.", ex);
+        }    }
     
-    public ChaoticSystem(int keyLength, String systemId) throws Exception {
+    public ChaoticSystem(int keyLength, String systemId) throws ChaoticSystemException {
         super(keyLength, systemId);
-        this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
+        try {
+            this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
+        } catch (NoSuchAlgorithmException ex) {
+            throw new ChaoticSystemException("Can't not use the secure random.", ex);
+        }
     }
     
-    public ChaoticSystem(int keyLength, Random random) throws Exception {
+    public ChaoticSystem(int keyLength, Random random) throws ChaoticSystemException {
         super(keyLength, UUID.nameUUIDFromBytes(Integer.toString(random.nextInt()).getBytes()).toString()); 
         this.generateSystem(this.keyLength, random);
     }
