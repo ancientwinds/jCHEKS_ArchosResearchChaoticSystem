@@ -1,23 +1,17 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-//<editor-fold defaultstate="collapsed" desc="Imports">
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-//</editor-fold>
+import java.util.*;
 
 /**
  *
  * @author jean-francois
  */
 public class ChaoticSystemMock extends AbstractChaoticSystem {
-    //<editor-fold defaultstate="collapsed" desc="Properties">
+    
     private int keyPointer;
     private ArrayList<byte[]> keyList;
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Constructors">
     public ChaoticSystemMock(){
         super(128);
         
@@ -26,9 +20,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
         this.InitializeMockKeys();
         this.generateSystem(128, null);
     }
-    //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Abstract methods implementation">
     @Override
     public void evolveSystem(int factor) {
         this.keyPointer++;
@@ -95,9 +87,7 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
        this.keyLength = 128;
        this.lastGeneratedKey = this.keyList.get(keyPointer);
     }
-    //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Methods">
     private void InitializeMockKeys() {
         this.keyList = new ArrayList<>();
         this.keyList.add(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
@@ -106,5 +96,4 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
         this.keyList.add(new byte[]{1, 22, 3, 24, 5, 26, 7, 28, 9, 20, 11, 22, 13, 24, 15, 26});
         this.keyList.add(new byte[]{5,7, 8, 9, 10, 11, 12, 28, 19, 110, 44, 111, 67, 28, 75, 99});
     }
-    //</editor-fold>
 }

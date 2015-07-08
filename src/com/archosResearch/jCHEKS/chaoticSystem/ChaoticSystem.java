@@ -1,26 +1,17 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-//<editor-fold defaultstate="collapsed" desc="Imports">
 import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import com.archosResearch.jCHEKS.concept.exception.ChaoticSystemException;
 import java.io.*;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.security.*;
+import java.util.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import org.xml.sax.InputSource;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.*;
-//</editor-fold>
 
 /**
  *
@@ -242,8 +233,6 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
         this.buildKey();
     }
-
-    //<editor-fold defaultstate="collapsed" desc="Methods">
 
     @Override
     public int hashCode() {

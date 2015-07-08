@@ -1,9 +1,7 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-//<editor-fold defaultstate="collapsed" desc="Imports">
 import java.util.*;
 import java.util.Map.Entry;
-//</editor-fold>
 
 /**
  *
@@ -11,14 +9,11 @@ import java.util.Map.Entry;
  */
 public class Agent implements Cloneable {
 
-    //<editor-fold defaultstate="collapsed" desc="Properties">
     private int agentId;
     private int keyPart;
     private HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
     private HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Accessors">
     public int getAgentId() {
         return this.agentId;
     }
@@ -34,9 +29,7 @@ public class Agent implements Cloneable {
     public HashMap<Integer, RuleSet> getRuleSets() {
         return this.ruleSets;
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Constructors">
     public Agent(int agentId, int maxImpact, int ruleCount, int agentCount, Random random) {
         this.agentId = agentId;
         this.keyPart = Utils.GetRandomInt(Byte.MAX_VALUE, random);
@@ -69,9 +62,7 @@ public class Agent implements Cloneable {
             }
         }
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Methods">
     @Override
     public Agent clone() throws CloneNotSupportedException {
         Agent agentClone = (Agent) super.clone();
@@ -199,5 +190,4 @@ public class Agent implements Cloneable {
 
         return sb.toString();
     }
-    //</editor-fold>
 }

@@ -7,13 +7,11 @@ import java.util.Random;
  * @author jean-francois
  */
 public class Rule implements Cloneable{
-    //<editor-fold defaultstate="collapsed" desc="Properties">
+
     private int destination;
     private int impact;
     private int delay;
-    //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Accessors">
     public int getDestination() {
         return this.destination;
     }
@@ -25,9 +23,7 @@ public class Rule implements Cloneable{
     public int getDelay() {
         return this.delay;
     }
-    //</editor-fold>
     
-    //<editor-fold defaultstate="collapsed" desc="Constructors">
     public Rule(int destination, int maxImpact, Random random)
     {
             this.destination = destination;
@@ -54,9 +50,7 @@ public class Rule implements Cloneable{
         this.delay = Integer.parseInt(values[2]);
         
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Methods">
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -103,5 +97,4 @@ public class Rule implements Cloneable{
         
         return sb.toString();
     }
-    //</editor-fold>
 }

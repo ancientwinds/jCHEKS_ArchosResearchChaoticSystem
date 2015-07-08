@@ -1,9 +1,7 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-//<editor-fold defaultstate="collapsed" desc="Imports">
 import java.util.Arrays;
 import java.util.Random;
-//</editor-fold>
 
 /**
  *
@@ -23,7 +21,6 @@ public class Utils {
     public static boolean QuarterShot(Random random) {
         int result = 0;
 
-        //result = SecureRandom.getInstance("SHA1PRNG").nextInt(2);
         result = random.nextInt(2);
 
         return result == 0;
