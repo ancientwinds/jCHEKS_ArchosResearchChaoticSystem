@@ -66,14 +66,14 @@ public class Agent implements Cloneable {
     @Override
     public Agent clone() throws CloneNotSupportedException {
         Agent agentClone = (Agent) super.clone();
-        
+
         agentClone.pendingImpacts = new HashMap();
         this.pendingImpacts.entrySet().stream().forEach((entrySet) -> {
             Integer key = entrySet.getKey();
             Integer value = entrySet.getValue();
             agentClone.pendingImpacts.put(key, value);
         });
-        
+
         agentClone.ruleSets = new HashMap();
         for (Entry<Integer, RuleSet> entrySet : ruleSets.entrySet()) {
             Integer key = entrySet.getKey();
@@ -83,7 +83,7 @@ public class Agent implements Cloneable {
 
         return agentClone;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -122,44 +122,48 @@ public class Agent implements Cloneable {
         return (RuleSet) this.ruleSets.get(this.keyPart);
     }
 
+    public static int adjustKeyPart(int keyPart) {
+        if (keyPart > Byte.MAX_VALUE) {
+            keyPart = Byte.MIN_VALUE + ((keyPart) % 127);
+        }
+        if (keyPart < Byte.MIN_VALUE) {
+            keyPart = Byte.MAX_VALUE - ((keyPart * -1) % 128);
+        }
+        return keyPart;
+    }
+
     private void registerImpact(int impact, int delay) {
         if (!this.pendingImpacts.containsKey(delay)) {
             this.pendingImpacts.put(delay, 0);
         }
 
-        this.pendingImpacts.put(delay,  this.pendingImpacts.get(delay) + impact);
+        this.pendingImpacts.put(delay, this.pendingImpacts.get(delay) + impact);
     }
 
     public void sendImpacts(ChaoticSystem system) {
         this.getCurrentRuleSet().getRules().stream().forEach((r) -> {
-                ((Agent) system.getAgents().get(r.getDestination())).registerImpact(r.getImpact(), r.getDelay());
+            ((Agent) system.getAgents().get(r.getDestination())).registerImpact(r.getImpact(), r.getDelay());
         });
 
         this.keyPart += this.getCurrentRuleSet().getSelfImpact();
     }
 
-    public void evolve(int factor, int maxImpact) { 
-        if(this.pendingImpacts.containsKey(0)){
-                this.keyPart += this.pendingImpacts.get(0);
-                this.pendingImpacts.remove(0);
+    public void evolve(int factor, int maxImpact) {
+        if (this.pendingImpacts.containsKey(0)) {
+            this.keyPart += this.pendingImpacts.get(0);
+            this.pendingImpacts.remove(0);
         }
         if (factor != 0) {
             this.keyPart += Math.floor(maxImpact * Math.sin(this.keyPart * factor));
         }
         HashMap<Integer, Integer> tempImpacts = new HashMap<>();
-        
+
         this.pendingImpacts.entrySet().stream().forEach((i) -> {
             tempImpacts.put(i.getKey() - 1, i.getValue());
         });
 
         this.pendingImpacts = tempImpacts;
-
-        if (this.keyPart > Byte.MAX_VALUE) {
-            this.keyPart = Byte.MIN_VALUE + ((this.keyPart) % 255);
-        }
-        if (this.keyPart < Byte.MIN_VALUE) {
-            this.keyPart = Byte.MAX_VALUE - ((this.keyPart * -1) % 255);
-        }
+        this.keyPart = adjustKeyPart(this.keyPart);
     }
 
     public String serialize() {

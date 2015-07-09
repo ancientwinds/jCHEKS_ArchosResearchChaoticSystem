@@ -76,4 +76,16 @@ public class ChaoticSystemTest {
         
         assertEquals(system.hashCode(),system.clone().hashCode());
     }
+    
+    @Test
+    public void temp_test(){
+        assertEquals(-128, Agent.adjustKeyPart(-128));
+        assertEquals(127, Agent.adjustKeyPart(127));
+        assertEquals(0, Agent.adjustKeyPart(0));
+        assertEquals(57, Agent.adjustKeyPart(57));
+        assertEquals(126, Agent.adjustKeyPart(-129));
+        assertEquals(-127, Agent.adjustKeyPart(128));
+        
+    }
 }
+    
