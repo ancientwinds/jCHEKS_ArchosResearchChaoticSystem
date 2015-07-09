@@ -132,7 +132,7 @@ public class Agent implements Cloneable {
 
     public void sendImpacts(ChaoticSystem system) {
         this.getCurrentRuleSet().getRules().stream().forEach((r) -> {
-                ((Agent) system.getAgents().get(r.getDestination())).registerImpact(r.getImpact(), r.getDelay());
+                system.getAgents().get(r.getDestination()).registerImpact(r.getImpact(), r.getDelay());
         });
 
         this.keyPart += this.getCurrentRuleSet().getSelfImpact();
@@ -172,7 +172,7 @@ public class Agent implements Cloneable {
         sb.append("@");
         this.ruleSets.entrySet().stream().forEach((rs) -> {
             sb.append("S");
-            sb.append(((RuleSet) rs.getValue()).serialize());
+            sb.append(rs.getValue().serialize());
         });
 
         sb.append("@");
