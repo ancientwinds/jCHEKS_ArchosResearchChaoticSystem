@@ -17,6 +17,20 @@ public class Utils {
         
         return result;
     }
+    
+    public static int GetRandomInt(int minBound, int maxBound, Random random) {
+        int result = random.nextInt((maxBound - minBound) + 1) + minBound;
+        return result;
+    }
+    
+    public static int GetRandomIntAvoidingZero(int minBound, int maxBound, Random random) {
+        int result = random.nextInt((maxBound - minBound) + 1) + minBound;
+        
+        while(result == 0) { 
+            result = random.nextInt((maxBound - minBound) + 1) + minBound;
+        }
+        return result;
+    }
 
     public static boolean QuarterShot(Random random) {
         int result = 0;

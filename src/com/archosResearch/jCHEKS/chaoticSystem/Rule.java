@@ -24,7 +24,7 @@ public class Rule implements Cloneable{
         return this.delay;
     }
     
-    public Rule(int destination, int maxImpact, Random random)
+    /*public Rule(int destination, int maxImpact, Random random)
     {
             this.destination = destination;            
             
@@ -35,6 +35,12 @@ public class Rule implements Cloneable{
                     this.impact *= -1;
             }
             this.delay = Utils.QuarterShot(random) ? 0 : Utils.GetRandomInt(3, random) + 1;
+    }*/
+    
+    public Rule(int destination, int minImpact, int maxImpact, int maxDelay, Random random) {
+        this.destination = destination;
+        this.impact = Utils.GetRandomIntAvoidingZero(minImpact, maxImpact, random);
+        this.delay = Utils.GetRandomInt(maxDelay, random);
     }
 
     /// <summary>

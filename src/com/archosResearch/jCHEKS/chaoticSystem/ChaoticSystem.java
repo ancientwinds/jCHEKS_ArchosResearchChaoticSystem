@@ -24,6 +24,12 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     private AbstractChaoticSystem currentClone;
     private byte[] toGenerateKey;
     private int toGenerateKeyIndex;
+    
+    private int minImpact;
+    private int maxImpact;
+    private int minKeyPart;
+    private int maxKeyPart;
+    private int maxDelay;
 
     public HashMap<Integer, Agent> getAgents() {
         return this.agents;
@@ -31,27 +37,41 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
     protected ChaoticSystem() {}
     
-    public ChaoticSystem(int keyLength) throws ChaoticSystemException {
+    public ChaoticSystem(int keyLength, String systemId, int minImpact, int maxImpact, int minKeyPart, int maxKeyPart, int maxDelay, Random random) throws KeyLenghtException {
+        this.keyLength = keyLength;
+        this.systemId = systemId;
+        
+        this.minImpact = minImpact;
+        this.maxImpact = maxImpact;
+        this.maxDelay = maxDelay;
+        this.minKeyPart = minKeyPart;
+        this.maxKeyPart = maxKeyPart;
+        
+        this.generateSystem(this.keyLength, random);
+    }
+        
+    /*public ChaoticSystem(int keyLength) throws ChaoticSystemException {
         super(keyLength);
         try {
             this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
         } catch (NoSuchAlgorithmException ex) {
             throw new ChaoticSystemException("Can't not use the secure random.", ex);
-        }    }
+        }
+    }*/
     
-    public ChaoticSystem(int keyLength, String systemId) throws ChaoticSystemException {
+    /*public ChaoticSystem(int keyLength, String systemId) throws ChaoticSystemException {
         super(keyLength, systemId);
         try {
             this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
         } catch (NoSuchAlgorithmException ex) {
             throw new ChaoticSystemException("Can't not use the secure random.", ex);
         }
-    }
+    }*/
     
-    public ChaoticSystem(int keyLength, Random random) throws ChaoticSystemException {
+    /*public ChaoticSystem(int keyLength, Random random) throws ChaoticSystemException {
         super(keyLength, UUID.nameUUIDFromBytes(Integer.toString(random.nextInt()).getBytes()).toString()); 
         this.generateSystem(this.keyLength, random);
-    }
+    }*/
 
     @Override
     public void evolveSystem(int factor) {
@@ -222,7 +242,8 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         //TODO We might want another extra for the cipherCheck
         int numberOfAgents = this.keyLength / Byte.SIZE;
         for (int i = 0; i < numberOfAgents; i++) {
-            this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1, random));
+            //this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1, random));
+            this.agents.put(i, new Agent(i,minImpact, maxImpact, minKeyPart, maxKeyPart, maxDelay, numberOfAgents, numberOfAgents - 1, random));
         }
 
         this.buildKey();

@@ -19,8 +19,9 @@ public class ChaoticSystemTest {
     
     @Test
     public void ChaoticSystemTest() throws Exception {
-        ChaoticSystem system1 = new ChaoticSystem(128);
-        ChaoticSystem system2 = new ChaoticSystem(128);
+        
+        ChaoticSystem system1 = new CryptoChaoticSystem(128, "id");
+        ChaoticSystem system2 = new CryptoChaoticSystem(128, "id2");
         
         system2.deserialize(system1.serialize());
         
@@ -29,19 +30,19 @@ public class ChaoticSystemTest {
     
     @Test
     public void get_a_small_key_test() throws Exception {
-        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem system = new CryptoChaoticSystem(128, "id");
         assertEquals(system.getKey(80).length, 10);
     }
     
     @Test
     public void get_a_big_key_test() throws Exception {
-        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem system = new CryptoChaoticSystem(128, "id");
         assertEquals(system.getKey(800).length, 100);
     }
     
     @Test
     public void get_three_keys_test() throws Exception {
-        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem system = new CryptoChaoticSystem(128, "id");
         assertEquals(system.getKey(8).length, 1);
         assertEquals(system.getKey(80).length, 10);
         assertEquals(system.getKey(800).length, 100);
@@ -49,12 +50,12 @@ public class ChaoticSystemTest {
     
     @Test
     public void clones_must_be_equals()throws Exception {
-        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem system = new CryptoChaoticSystem(128, "id");
         assertTrue(system.equals(system.clone()));
     }
     @Test
     public void clone_stay_in_sync()throws Exception {
-        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem system = new CryptoChaoticSystem(128, "id");
         ChaoticSystem clone = system.clone();
         system.evolveSystem();
         clone.evolveSystem();
@@ -63,7 +64,7 @@ public class ChaoticSystemTest {
     }
     @Test
     public void clone_are_not_same()throws Exception {
-        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem system = new CryptoChaoticSystem(128, "id");
         ChaoticSystem clone = system.clone();
         system.evolveSystem();
         
@@ -72,19 +73,19 @@ public class ChaoticSystemTest {
     
     @Test
     public void hashcodes_of_clones_must_be_equals()throws Exception {
-        ChaoticSystem system = new ChaoticSystem(128);
+        ChaoticSystem system = new CryptoChaoticSystem(128, "id");
         
         assertEquals(system.hashCode(),system.clone().hashCode());
     }
     
     @Test
     public void temp_test(){
-        assertEquals(-128, Agent.adjustKeyPart(-128));
+       /* assertEquals(-128, Agent.adjustKeyPart(-128));
         assertEquals(127, Agent.adjustKeyPart(127));
         assertEquals(0, Agent.adjustKeyPart(0));
         assertEquals(57, Agent.adjustKeyPart(57));
         assertEquals(126, Agent.adjustKeyPart(-129));
-        assertEquals(-127, Agent.adjustKeyPart(128));
+        assertEquals(-127, Agent.adjustKeyPart(128));*/
         
     }
 }

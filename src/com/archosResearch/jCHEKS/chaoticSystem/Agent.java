@@ -11,6 +11,10 @@ public class Agent implements Cloneable {
 
     private int agentId;
     private int keyPart;
+    
+    private int minKeyPart;
+    private int maxKeyPart;
+    
     private HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
     private HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
 
@@ -30,7 +34,7 @@ public class Agent implements Cloneable {
         return this.ruleSets;
     }
 
-    public Agent(int agentId, int maxImpact, int ruleCount, int agentCount, Random random) {
+    /*public Agent(int agentId, int maxImpact, int ruleCount, int agentCount, Random random) {
         this.agentId = agentId;
         this.keyPart = Utils.GetRandomInt(Byte.MAX_VALUE, random);
         if (Utils.QuarterShot(random)) {
@@ -39,6 +43,19 @@ public class Agent implements Cloneable {
 
         for (int i = Byte.MIN_VALUE; i < (Byte.MAX_VALUE + 1); i++) {
             this.ruleSets.put(i, new RuleSet(i, maxImpact, ruleCount, agentCount, random));
+        }
+    }*/
+    
+    public Agent(int agentId, int minImpact, int maxImpact, int minKeyPart, int maxKeyPart, int maxDelay, int ruleCount, int agentCount, Random random) {
+        
+        this.minKeyPart = minKeyPart;
+        this.maxKeyPart = maxKeyPart;
+        
+        this.agentId = agentId;
+        this.keyPart = Utils.GetRandomInt(this.minKeyPart, this.maxKeyPart, random);
+
+        for (int i = this.minKeyPart; i < (this.maxKeyPart + 1); i++) {
+            this.ruleSets.put(i, new RuleSet(i, minImpact, maxImpact, maxDelay, ruleCount, agentCount, random));
         }
     }
 
@@ -122,12 +139,12 @@ public class Agent implements Cloneable {
         return this.ruleSets.get(this.keyPart);
     }
 
-    public static int adjustKeyPart(int keyPart) {
-        if (keyPart > Byte.MAX_VALUE) {
-            keyPart = Byte.MIN_VALUE + ((keyPart) % 127);
+    private int adjustKeyPart(int keyPart) {
+        if (keyPart > this.maxKeyPart) {
+            keyPart = this.minKeyPart + ((keyPart) % 127);
         }
-        if (keyPart < Byte.MIN_VALUE) {
-            keyPart = Byte.MAX_VALUE - ((keyPart * -1) % 128);
+        if (keyPart < this.minKeyPart) {
+            keyPart = this.maxKeyPart - ((keyPart * -1) % 128);
         }
         return keyPart;
     }
@@ -163,7 +180,7 @@ public class Agent implements Cloneable {
         });
 
         this.pendingImpacts = tempImpacts;
-        this.keyPart = adjustKeyPart(this.keyPart);
+        this.keyPart = this.adjustKeyPart(this.keyPart);
     }
 
     public String serialize() {
