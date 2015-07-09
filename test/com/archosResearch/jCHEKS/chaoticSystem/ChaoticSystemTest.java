@@ -1,6 +1,7 @@
+package com.archosResearch.jCHEKS.chaoticSystem;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
-import com.archosResearch.jCHEKS.chaoticSystem.*;
 
 /**
  *
