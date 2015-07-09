@@ -13,7 +13,6 @@ public class Agent implements Cloneable {
     private int keyPart;
     private HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
     private HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
- 
 
     public int getAgentId() {
         return this.agentId;
@@ -31,17 +30,15 @@ public class Agent implements Cloneable {
         return this.ruleSets;
     }
 
-    public Agent(int agentId, int maxImpact, int ruleCount, int agentCount) {
+    public Agent(int agentId, int maxImpact, int ruleCount, int agentCount, Random random) {
         this.agentId = agentId;
-        this.keyPart = Utils.GetRandomInt(Byte.MAX_VALUE);
-        
-        //TODO -128 is never possible
-        if (Utils.QuarterShot()) {
+        this.keyPart = Utils.GetRandomInt(Byte.MAX_VALUE, random);
+        if (Utils.QuarterShot(random)) {
             this.keyPart *= -1;
         }
 
         for (int i = Byte.MIN_VALUE; i < (Byte.MAX_VALUE + 1); i++) {
-            this.ruleSets.put(i, new RuleSet(i, maxImpact, ruleCount, agentCount));
+            this.ruleSets.put(i, new RuleSet(i, maxImpact, ruleCount, agentCount, random));
         }
     }
 

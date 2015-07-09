@@ -1,8 +1,6 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-//<editor-fold defaultstate="collapsed" desc="Imports">
 import java.util.*;
-//</editor-fold>
 
 /**
  *
@@ -10,14 +8,10 @@ import java.util.*;
  */
 public class RuleSet implements Cloneable {
 
-    //<editor-fold defaultstate="collapsed" desc="Properties">
-
     private int level;
     private int selfImpact;
     private ArrayList<Rule> rules;
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Accessors">
     public int getLevel() {
         return this.level;
     }
@@ -29,24 +23,22 @@ public class RuleSet implements Cloneable {
     public ArrayList<Rule> getRules() {
         return this.rules;
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Constructors">
-    public RuleSet(int level, int maxImpact, int ruleCount, int agentCount) {
+    public RuleSet(int level, int maxImpact, int ruleCount, int agentCount, Random random) {
         this.initializeLists();
 
         this.level = level;
-        this.selfImpact = Utils.GetRandomInt(maxImpact);
+        this.selfImpact = Utils.GetRandomInt(maxImpact, random);
         if (this.selfImpact == 0) {
             this.selfImpact++;
         }
-        if (Utils.QuarterShot()) {
+        if (Utils.QuarterShot(random)) {
             this.selfImpact *= -1;
         }
 
         // Ajouter les relations
         for (int x = 0; x < ruleCount; x++) {
-            this.rules.add(new Rule(Utils.GetRandomInt(agentCount), maxImpact));
+            this.rules.add(new Rule(Utils.GetRandomInt(agentCount, random), maxImpact, random));
         }
     }
 
@@ -64,9 +56,7 @@ public class RuleSet implements Cloneable {
             this.rules.add(new Rule(s));
         }
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Methods">
     @Override
     public RuleSet clone() throws CloneNotSupportedException {
         RuleSet ruleSetClone = (RuleSet) super.clone();
@@ -123,5 +113,4 @@ public class RuleSet implements Cloneable {
     private void initializeLists() {
         this.rules = new ArrayList<>();
     }
-    //</editor-fold>
 }
