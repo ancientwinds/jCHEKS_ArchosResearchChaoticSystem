@@ -26,10 +26,10 @@ public class Rule implements Cloneable{
     
     public Rule(int destination, int maxImpact, Random random)
     {
-            this.destination = destination;
-            
+            this.destination = destination;            
             
             this.impact = Utils.GetRandomInt(maxImpact, random);
+            //TODO Avoid 0 in random.
             if (this.impact == 0) this.impact++;
             if (Utils.QuarterShot(random)) {
                     this.impact *= -1;
@@ -38,7 +38,7 @@ public class Rule implements Cloneable{
     }
 
     /// <summary>
-    /// <para>Constructor building a relation fromh the specified xml node.</para>
+    /// <para>Constructor building a relation from the specified xml node.</para>
     /// </summary>
     /// <param name="relationNode">Node containing the relation definition.</param>
     public Rule(String serialization)

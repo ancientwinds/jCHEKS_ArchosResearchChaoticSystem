@@ -29,6 +29,7 @@ public class RuleSet implements Cloneable {
 
         this.level = level;
         this.selfImpact = Utils.GetRandomInt(maxImpact, random);
+        //TODO Avoid 0 in random generation.
         if (this.selfImpact == 0) {
             this.selfImpact++;
         }
