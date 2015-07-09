@@ -98,12 +98,6 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     public ChaoticSystem cloneSystem() throws CloningException {
         try {
             return this.clone();
-            
-            /* Other way to do it.
-            ChaoticSystem system = new ChaoticSystem(this.keyLength);
-            system.deserialize(this.serialize());
-            return system;
-            */
         } catch (CloneNotSupportedException ex) {
             throw new CloningException("Unable to clone system.", ex);
         }
@@ -218,7 +212,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     public final void generateSystem(int keyLength) throws KeyLenghtException{
         this.keyLength = keyLength;
 
-        if ((this.keyLength % 128) != 0) {
+        if ((this.keyLength % 8) != 0) {
             throw new KeyLenghtException("Invalid key length. Must be a multiple of 128.");
         }
 
@@ -230,8 +224,6 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
         this.buildKey();
     }
-
-    //<editor-fold defaultstate="collapsed" desc="Methods">
 
     @Override
     public int hashCode() {

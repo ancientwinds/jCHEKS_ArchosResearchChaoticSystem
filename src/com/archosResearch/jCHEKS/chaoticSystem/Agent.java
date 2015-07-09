@@ -1,9 +1,7 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-//<editor-fold defaultstate="collapsed" desc="Imports">
 import java.util.*;
 import java.util.Map.Entry;
-//</editor-fold>
 
 /**
  *
@@ -11,14 +9,12 @@ import java.util.Map.Entry;
  */
 public class Agent implements Cloneable {
 
-    //<editor-fold defaultstate="collapsed" desc="Properties">
     private int agentId;
     private int keyPart;
     private HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
     private HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
-    //</editor-fold>
+ 
 
-    //<editor-fold defaultstate="collapsed" desc="Accessors">
     public int getAgentId() {
         return this.agentId;
     }
@@ -34,12 +30,12 @@ public class Agent implements Cloneable {
     public HashMap<Integer, RuleSet> getRuleSets() {
         return this.ruleSets;
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Constructors">
     public Agent(int agentId, int maxImpact, int ruleCount, int agentCount) {
         this.agentId = agentId;
         this.keyPart = Utils.GetRandomInt(Byte.MAX_VALUE);
+        
+        //TODO -128 is never possible
         if (Utils.QuarterShot()) {
             this.keyPart *= -1;
         }
@@ -69,9 +65,7 @@ public class Agent implements Cloneable {
             }
         }
     }
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Methods">
     @Override
     public Agent clone() throws CloneNotSupportedException {
         Agent agentClone = (Agent) super.clone();
@@ -131,37 +125,32 @@ public class Agent implements Cloneable {
         return (RuleSet) this.ruleSets.get(this.keyPart);
     }
 
-    public void registerImpact(int impact, int delay) {
+    private void registerImpact(int impact, int delay) {
         if (!this.pendingImpacts.containsKey(delay)) {
             this.pendingImpacts.put(delay, 0);
         }
 
-        this.pendingImpacts.put(delay, (int) this.pendingImpacts.get(delay) + impact);
+        this.pendingImpacts.put(delay,  this.pendingImpacts.get(delay) + impact);
     }
 
     public void sendImpacts(ChaoticSystem system) {
         this.getCurrentRuleSet().getRules().stream().forEach((r) -> {
-            try {
                 ((Agent) system.getAgents().get(r.getDestination())).registerImpact(r.getImpact(), r.getDelay());
-            } catch (Exception e) {
-                //TODO Create new Exception
-            }
         });
 
         this.keyPart += this.getCurrentRuleSet().getSelfImpact();
     }
 
-    public void evolve(int factor, int maxImpact) {
-        if(!this.pendingImpacts.isEmpty()){
-            this.keyPart += (int)this.pendingImpacts.get(0);
+    public void evolve(int factor, int maxImpact) { 
+        if(this.pendingImpacts.containsKey(0)){
+                this.keyPart += this.pendingImpacts.get(0);
+                this.pendingImpacts.remove(0);
         }
         if (factor != 0) {
             this.keyPart += Math.floor(maxImpact * Math.sin(this.keyPart * factor));
         }
-
-        this.pendingImpacts.remove(0);
         HashMap<Integer, Integer> tempImpacts = new HashMap<>();
-
+        
         this.pendingImpacts.entrySet().stream().forEach((i) -> {
             tempImpacts.put(i.getKey() - 1, i.getValue());
         });
@@ -199,5 +188,4 @@ public class Agent implements Cloneable {
 
         return sb.toString();
     }
-    //</editor-fold>
 }
