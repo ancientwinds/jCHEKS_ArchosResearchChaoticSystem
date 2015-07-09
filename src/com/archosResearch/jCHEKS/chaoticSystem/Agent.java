@@ -119,7 +119,7 @@ public class Agent implements Cloneable {
     }
 
     public RuleSet getCurrentRuleSet() {
-        return (RuleSet) this.ruleSets.get(this.keyPart);
+        return this.ruleSets.get(this.keyPart);
     }
 
     private void registerImpact(int impact, int delay) {
