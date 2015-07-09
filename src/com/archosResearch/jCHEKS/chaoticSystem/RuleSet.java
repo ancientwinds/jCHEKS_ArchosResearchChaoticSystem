@@ -43,14 +43,14 @@ public class RuleSet implements Cloneable {
         }
     }*/
     
-    public RuleSet(int level, int minImpact, int maxImpact, int maxDelay, int ruleCount, int agentCount, Random random) {
+    public RuleSet(int level, Range impactRange, Range delayRange, int ruleCount, int agentCount, Random random) {
         this.initializeLists();
 
         this.level = level;
-        this.selfImpact = Utils.GetRandomIntAvoidingZero(minImpact, maxImpact, random);
+        this.selfImpact = Utils.GetRandomIntAvoidingZero(impactRange, random);
         
         for (int x = 0; x < ruleCount; x++) {
-            this.rules.add(new Rule(Utils.GetRandomInt(agentCount, random),minImpact, maxImpact, maxDelay, random));
+            this.rules.add(new Rule(Utils.GetRandomInt(agentCount, random), impactRange, delayRange, random));
         }
     }
 

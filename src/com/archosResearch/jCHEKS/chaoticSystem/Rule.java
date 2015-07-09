@@ -37,10 +37,10 @@ public class Rule implements Cloneable{
             this.delay = Utils.QuarterShot(random) ? 0 : Utils.GetRandomInt(3, random) + 1;
     }*/
     
-    public Rule(int destination, int minImpact, int maxImpact, int maxDelay, Random random) {
+    public Rule(int destination, Range impactRange, Range delayRange, Random random) {
         this.destination = destination;
-        this.impact = Utils.GetRandomIntAvoidingZero(minImpact, maxImpact, random);
-        this.delay = Utils.GetRandomInt(maxDelay, random);
+        this.impact = Utils.GetRandomIntAvoidingZero(impactRange, random);
+        this.delay = Utils.GetRandomInt(delayRange, random);
     }
 
     /// <summary>

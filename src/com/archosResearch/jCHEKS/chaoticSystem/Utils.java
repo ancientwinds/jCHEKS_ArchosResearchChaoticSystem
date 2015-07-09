@@ -18,18 +18,21 @@ public class Utils {
         return result;
     }
     
-    public static int GetRandomInt(int minBound, int maxBound, Random random) {
-        int result = random.nextInt((maxBound - minBound) + 1) + minBound;
+    public static int GetRandomInt(Range range, Random random) {        
+        return GetRandInt(range, random);
+    }
+    
+    public static int GetRandomIntAvoidingZero(Range range, Random random) {
+        int result = GetRandInt(range, random);
+        
+        while(result == 0) { 
+            result = GetRandInt(range, random);
+        }
         return result;
     }
     
-    public static int GetRandomIntAvoidingZero(int minBound, int maxBound, Random random) {
-        int result = random.nextInt((maxBound - minBound) + 1) + minBound;
-        
-        while(result == 0) { 
-            result = random.nextInt((maxBound - minBound) + 1) + minBound;
-        }
-        return result;
+    private static int GetRandInt(Range range, Random random) {
+        return random.nextInt((range.max - range.min) + 1) + range.min;
     }
 
     public static boolean QuarterShot(Random random) {

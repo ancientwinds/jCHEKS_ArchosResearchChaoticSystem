@@ -12,8 +12,7 @@ public class Agent implements Cloneable {
     private int agentId;
     private int keyPart;
     
-    private int minKeyPart;
-    private int maxKeyPart;
+    private Range keyPartRange;
     
     private HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
     private HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
@@ -46,16 +45,15 @@ public class Agent implements Cloneable {
         }
     }*/
     
-    public Agent(int agentId, int minImpact, int maxImpact, int minKeyPart, int maxKeyPart, int maxDelay, int ruleCount, int agentCount, Random random) {
+    public Agent(int agentId, Range impactRange, Range keyPartRange, Range delayRange, int ruleCount, int agentCount, Random random) {
         
-        this.minKeyPart = minKeyPart;
-        this.maxKeyPart = maxKeyPart;
+        this.keyPartRange = keyPartRange;
         
         this.agentId = agentId;
-        this.keyPart = Utils.GetRandomInt(this.minKeyPart, this.maxKeyPart, random);
+        this.keyPart = Utils.GetRandomInt(keyPart, random);
 
-        for (int i = this.minKeyPart; i < (this.maxKeyPart + 1); i++) {
-            this.ruleSets.put(i, new RuleSet(i, minImpact, maxImpact, maxDelay, ruleCount, agentCount, random));
+        for (int i = this.keyPartRange.min; i < (this.keyPartRange.max + 1); i++) {
+            this.ruleSets.put(i, new RuleSet(i, impactRange, delayRange, ruleCount, agentCount, random));
         }
     }
 
@@ -140,11 +138,11 @@ public class Agent implements Cloneable {
     }
 
     private int adjustKeyPart(int keyPart) {
-        if (keyPart > this.maxKeyPart) {
-            keyPart = this.minKeyPart + ((keyPart) % 127);
+        if (keyPart > this.keyPartRange.max) {
+            keyPart = this.keyPartRange.min + ((keyPart) % 127);
         }
-        if (keyPart < this.minKeyPart) {
-            keyPart = this.maxKeyPart - ((keyPart * -1) % 128);
+        if (keyPart < this.keyPartRange.min) {
+            keyPart = this.keyPartRange.max - ((keyPart * -1) % 128);
         }
         return keyPart;
     }

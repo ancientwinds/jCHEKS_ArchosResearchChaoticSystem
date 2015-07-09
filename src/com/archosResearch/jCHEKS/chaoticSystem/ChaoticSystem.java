@@ -30,6 +30,10 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     private int minKeyPart;
     private int maxKeyPart;
     private int maxDelay;
+    
+    private Range impactRange;
+    private Range keyPartRange;
+    private Range delayRange;
 
     public HashMap<Integer, Agent> getAgents() {
         return this.agents;
@@ -37,15 +41,13 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
     protected ChaoticSystem() {}
     
-    public ChaoticSystem(int keyLength, String systemId, int minImpact, int maxImpact, int minKeyPart, int maxKeyPart, int maxDelay, Random random) throws KeyLenghtException {
+    public ChaoticSystem(int keyLength, String systemId, Range impactRange, Range keyPartRange, Range delayRange, Random random) throws KeyLenghtException {
         this.keyLength = keyLength;
         this.systemId = systemId;
         
-        this.minImpact = minImpact;
-        this.maxImpact = maxImpact;
-        this.maxDelay = maxDelay;
-        this.minKeyPart = minKeyPart;
-        this.maxKeyPart = maxKeyPart;
+        this.impactRange = impactRange;
+        this.keyPartRange = keyPartRange;
+        this.delayRange = delayRange;
         
         this.generateSystem(this.keyLength, random);
     }
@@ -243,7 +245,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         int numberOfAgents = this.keyLength / Byte.SIZE;
         for (int i = 0; i < numberOfAgents; i++) {
             //this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1, random));
-            this.agents.put(i, new Agent(i,minImpact, maxImpact, minKeyPart, maxKeyPart, maxDelay, numberOfAgents, numberOfAgents - 1, random));
+            this.agents.put(i, new Agent(i, this.impactRange, this.keyPartRange, this.delayRange, numberOfAgents, numberOfAgents - 1, random));
         }
 
         this.buildKey();
