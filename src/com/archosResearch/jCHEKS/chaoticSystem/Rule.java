@@ -34,6 +34,7 @@ public class Rule implements Cloneable{
             if (Utils.QuarterShot(random)) {
                     this.impact *= -1;
             }
+            //TODO Full random.
             this.delay = Utils.QuarterShot(random) ? 0 : Utils.GetRandomInt(3, random) + 1;
     }
 
