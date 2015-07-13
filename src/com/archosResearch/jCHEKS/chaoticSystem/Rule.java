@@ -18,7 +18,7 @@ public class Rule implements Cloneable{
     private int impact;
     private int delay;
     
-    private static final String XML_RULE_NAME = "r";
+    public static final String XML_RULE_NAME = "r";
     private static final String XML_DESTINATION_NAME = "d";
     private static final String XML_DELAY_NAME = "dl";
     private static final String XML_IMPACT_NAME = "i";
@@ -70,25 +70,13 @@ public class Rule implements Cloneable{
         this.delay = Integer.parseInt(values[2]);
     }
     
-    public static Rule desirialize(String xmlString) throws XMLSerializationException {
-        try {
-            Rule rule = new Rule();
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            InputSource is = new InputSource(new StringReader(xmlString));
-            Document doc = dBuilder.parse(is);
-            
-            doc.getDocumentElement().normalize();
-            rule.destination = Integer.parseInt(doc.getElementsByTagName("destination").item(0).getTextContent());
-            rule.impact = Integer.parseInt(doc.getElementsByTagName("impact").item(0).getTextContent());
-            rule.delay = Integer.parseInt(doc.getElementsByTagName("delay").item(0).getTextContent());
-            
-            return rule;
-        } catch (ParserConfigurationException | SAXException | IOException ex) {
-            throw new XMLSerializationException("Error while desirealizing a rule", ex);
-        }
-    }
+    public Rule(Element element) {
+        this.destination = Integer.parseInt(element.getElementsByTagName(XML_DESTINATION_NAME).item(0).getTextContent());
+        this.impact = Integer.parseInt(element.getElementsByTagName(XML_IMPACT_NAME).item(0).getTextContent());
+        this.delay = Integer.parseInt(element.getElementsByTagName(XML_DELAY_NAME).item(0).getTextContent());
 
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

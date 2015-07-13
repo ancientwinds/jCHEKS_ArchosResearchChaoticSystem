@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -19,7 +21,7 @@ public class Agent implements Cloneable {
     private HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
     private HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
     
-    private static final String XML_AGENT_NAME = "a";
+    public static final String XML_AGENT_NAME = "a";
     private static final String XML_AGENTID_NAME = "ai";
     private static final String XML_KEYPART_NAME = "kp";
     private static final String XML_KEYPART_RANGE_NAME = "kpr";
@@ -95,6 +97,39 @@ public class Agent implements Cloneable {
                 this.pendingImpacts.put(Integer.parseInt(pi[0]), Integer.parseInt(pi[1]));
             }
         }
+    }
+    
+    public Agent(Element element) {
+        this.agentId = Integer.parseInt(element.getElementsByTagName(XML_AGENTID_NAME).item(0).getTextContent());
+        this.keyPart = Integer.parseInt(element.getElementsByTagName(XML_KEYPART_NAME).item(0).getTextContent());
+    
+        int min = Integer.parseInt(element.getElementsByTagName(XML_KEYPART_MIN_NAME).item(0).getTextContent());
+        int max = Integer.parseInt(element.getElementsByTagName(XML_KEYPART_MAX_NAME).item(0).getTextContent());
+        this.keyPartRange = new Range(min, max);
+        
+        NodeList ruleSetList = element.getElementsByTagName(XML_RULESET_NAME);
+        this.ruleSets = new HashMap();
+
+        for(int i = 0; i < ruleSetList.getLength(); i++) {
+            Element node = (Element) ruleSetList.item(i);
+            
+            int ruleToKey = Integer.parseInt(node.getElementsByTagName(XML_RULETOKEY_NAME).item(0).getTextContent());
+            RuleSet ruleSet = new RuleSet(node);
+            this.ruleSets.put(ruleToKey, ruleSet);
+        }
+        
+        NodeList pendingImpactsList = element.getElementsByTagName(XML_PENDINGIMPACT_NAME);
+        this.pendingImpacts = new HashMap();
+
+        for(int i = 0; i < pendingImpactsList.getLength(); i++) {
+            Element node = (Element) pendingImpactsList.item(i);
+            
+            int impact = Integer.parseInt(node.getElementsByTagName(XML_IMPACT_NAME).item(0).getTextContent());
+            int delay = Integer.parseInt(node.getElementsByTagName(XML_DELAY_NAME).item(0).getTextContent());
+
+            this.pendingImpacts.put(delay, impact);
+        }
+    
     }
 
     @Override
@@ -267,8 +302,8 @@ public class Agent implements Cloneable {
             Element pendingImpact = doc.createElement(XML_PENDINGIMPACT_NAME);
             Element impact = doc.createElement(XML_IMPACT_NAME);
             Element delay = doc.createElement(XML_DELAY_NAME);
-            impact.appendChild(doc.createTextNode(Integer.toString(pair.getKey())));
-            delay.appendChild(doc.createTextNode(Integer.toString(pair.getValue())));
+            impact.appendChild(doc.createTextNode(Integer.toString(pair.getValue())));
+            delay.appendChild(doc.createTextNode(Integer.toString(pair.getKey())));
             pendingImpact.appendChild(impact);
             pendingImpact.appendChild(delay);
             pendingImpactsElement.appendChild(pendingImpact);

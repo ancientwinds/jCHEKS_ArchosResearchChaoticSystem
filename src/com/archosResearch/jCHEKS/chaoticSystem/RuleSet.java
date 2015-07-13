@@ -3,6 +3,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 import java.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -74,6 +75,20 @@ public class RuleSet implements Cloneable {
 
         for (String s : ruleValues) {
             this.rules.add(new Rule(s));
+        }
+    }
+    
+    public RuleSet(Element element) {
+        this.initializeLists();
+        
+        this.selfImpact = Integer.parseInt(element.getElementsByTagName(XML_SELFIMPACT_NAME).item(0).getTextContent());
+        this.level = Integer.parseInt(element.getElementsByTagName(XML_LEVEL_NAME).item(0).getTextContent());
+    
+        NodeList rulesList = element.getElementsByTagName(Rule.XML_RULE_NAME);
+
+        for(int i = 0; i < rulesList.getLength(); i++) {
+            Element node = (Element) rulesList.item(i);
+            this.rules.add(new Rule(node));
         }
     }
     

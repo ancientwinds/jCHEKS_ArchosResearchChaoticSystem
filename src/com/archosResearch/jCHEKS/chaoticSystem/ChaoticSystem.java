@@ -175,12 +175,14 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
         system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName(XML_LASTKEY_NAME).item(0).getTextContent());
 
-        NodeList nList = doc.getElementsByTagName("agent");
+        
+        
+        NodeList nList = doc.getElementsByTagName("a");
         system.agents = new HashMap();
 
         for(int i = 0; i < nList.getLength(); i++) {
             Node element = nList.item(i);
-            Agent tempAgent = new Agent(element.getTextContent());
+            Agent tempAgent = new Agent((Element) element);
             system.agents.put(tempAgent.getAgentId(), tempAgent);
         }
         

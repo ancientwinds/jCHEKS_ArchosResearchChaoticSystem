@@ -13,7 +13,7 @@ public class FileReader {
     
     private static final String chaoticSystemDir = "system/";
     
-    public static AbstractChaoticSystem readChaoticSystem(String fileName) throws Exception {
+    public static ChaoticSystem readChaoticSystem(String fileName) throws Exception {
         File dir = new File(chaoticSystemDir);
         dir.mkdirs();
         String fileToSave = chaoticSystemDir + fileName;
