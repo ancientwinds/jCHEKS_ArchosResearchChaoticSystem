@@ -2,10 +2,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 import java.util.*;
 import java.util.Map.Entry;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 /**
  *
@@ -34,10 +31,7 @@ public class Agent implements Cloneable {
     private static final String XML_PENDINGIMPACT_NAME = "pi";
     private static final String XML_IMPACT_NAME = "im";
     private static final String XML_DELAY_NAME = "de";
-    
-
-
-    
+      
     public int getAgentId() {
         return this.agentId;
     }
@@ -53,19 +47,7 @@ public class Agent implements Cloneable {
     public HashMap<Integer, RuleSet> getRuleSets() {
         return this.ruleSets;
     }
-
-    /*public Agent(int agentId, int maxImpact, int ruleCount, int agentCount, Random random) {
-        this.agentId = agentId;
-        this.keyPart = Utils.GetRandomInt(Byte.MAX_VALUE, random);
-        if (Utils.QuarterShot(random)) {
-            this.keyPart *= -1;
-        }
-
-        for (int i = Byte.MIN_VALUE; i < (Byte.MAX_VALUE + 1); i++) {
-            this.ruleSets.put(i, new RuleSet(i, maxImpact, ruleCount, agentCount, random));
-        }
-    }*/
-    
+   
     public Agent(int agentId, Range impactRange, Range keyPartRange, Range delayRange, int ruleCount, int agentCount, Random random) {
         
         this.keyPartRange = keyPartRange;
@@ -73,7 +55,7 @@ public class Agent implements Cloneable {
         this.agentId = agentId;
         this.keyPart = Utils.GetRandomInt(keyPart, random);
 
-        for (int i = this.keyPartRange.min; i < (this.keyPartRange.max + 1); i++) {
+        for (int i = this.keyPartRange.getMin(); i < (this.keyPartRange.getMax() + 1); i++) {
             this.ruleSets.put(i, new RuleSet(i, impactRange, delayRange, ruleCount, agentCount, random));
         }
     }
@@ -192,11 +174,11 @@ public class Agent implements Cloneable {
     }
 
     private int adjustKeyPart(int keyPart) {
-        if (keyPart > this.keyPartRange.max) {
-            keyPart = this.keyPartRange.min + ((keyPart) % 127);
+        if (keyPart > this.keyPartRange.getMax()) {
+            keyPart = this.keyPartRange.getMin() + ((keyPart) % 127);
         }
-        if (keyPart < this.keyPartRange.min) {
-            keyPart = this.keyPartRange.max - ((keyPart * -1) % 128);
+        if (keyPart < this.keyPartRange.getMin()) {
+            keyPart = this.keyPartRange.getMax() - ((keyPart * -1) % 128);
         }
         return keyPart;
     }
@@ -275,8 +257,8 @@ public class Agent implements Cloneable {
         Element keyPartRangeElement = doc.createElement(XML_KEYPART_RANGE_NAME);
         Element min = doc.createElement(XML_KEYPART_MIN_NAME);
         Element max = doc.createElement(XML_KEYPART_MAX_NAME);
-        min.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.min)));
-        max.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.max)));
+        min.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMin())));
+        max.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMax())));
         keyPartRangeElement.appendChild(min);
         keyPartRangeElement.appendChild(max);        
         rootElement.appendChild(keyPartRangeElement);
@@ -293,7 +275,6 @@ public class Agent implements Cloneable {
             ruleSetElement.appendChild(ruleSet);
         }
         rootElement.appendChild(ruleSetElement);
-
         
         Element pendingImpactsElement = doc.createElement(XML_PENDINGIMPACTS_NAME);
         Iterator pending = this.pendingImpacts.entrySet().iterator();

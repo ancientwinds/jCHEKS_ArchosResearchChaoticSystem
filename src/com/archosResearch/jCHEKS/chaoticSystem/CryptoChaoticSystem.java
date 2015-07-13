@@ -1,11 +1,8 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 import com.archosResearch.jCHEKS.chaoticSystem.exception.KeyLenghtException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Random;
-import java.util.UUID;
-
+import java.security.*;
+import java.util.*;
 
 /**
  *

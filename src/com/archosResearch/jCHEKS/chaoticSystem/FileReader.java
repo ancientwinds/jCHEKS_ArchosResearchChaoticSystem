@@ -1,6 +1,5 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.*;

@@ -1,12 +1,7 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-import com.archosResearch.jCHEKS.chaoticSystem.exception.XMLSerializationException;
-import java.io.IOException;
-import java.io.*;
 import java.util.Random;
-import javax.xml.parsers.*;
 import org.w3c.dom.*;
-import org.xml.sax.*;
 
 /**
  *
@@ -36,19 +31,6 @@ public class Rule implements Cloneable{
         return this.delay;
     }
     
-    /*public Rule(int destination, int maxImpact, Random random)
-    {
-            this.destination = destination;            
-            
-            this.impact = Utils.GetRandomInt(maxImpact, random);
-            //TODO Avoid 0 in random.
-            if (this.impact == 0) this.impact++;
-            if (Utils.QuarterShot(random)) {
-                    this.impact *= -1;
-            }
-            this.delay = Utils.QuarterShot(random) ? 0 : Utils.GetRandomInt(3, random) + 1;
-    }*/
-    
     public Rule(int destination, Range impactRange, Range delayRange, Random random) {
         this.destination = destination;
         this.impact = Utils.GetRandomIntAvoidingZero(impactRange, random);
@@ -57,10 +39,6 @@ public class Rule implements Cloneable{
     
     private Rule() {}
 
-    /// <summary>
-    /// <para>Constructor building a relation from the specified xml node.</para>
-    /// </summary>
-    /// <param name="relationNode">Node containing the relation definition.</param>
     public Rule(String serialization)
     {
         String[] values = serialization.split("%");

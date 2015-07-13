@@ -50,29 +50,6 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         this.generateSystem(this.keyLength, random);
     }
         
-    /*public ChaoticSystem(int keyLength) throws ChaoticSystemException {
-        super(keyLength);
-        try {
-            this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
-        } catch (NoSuchAlgorithmException ex) {
-            throw new ChaoticSystemException("Can't not use the secure random.", ex);
-        }
-    }*/
-    
-    /*public ChaoticSystem(int keyLength, String systemId) throws ChaoticSystemException {
-        super(keyLength, systemId);
-        try {
-            this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
-        } catch (NoSuchAlgorithmException ex) {
-            throw new ChaoticSystemException("Can't not use the secure random.", ex);
-        }
-    }*/
-    
-    /*public ChaoticSystem(int keyLength, Random random) throws ChaoticSystemException {
-        super(keyLength, UUID.nameUUIDFromBytes(Integer.toString(random.nextInt()).getBytes()).toString()); 
-        this.generateSystem(this.keyLength, random);
-    }*/
-
     @Override
     public void evolveSystem(int factor) {
         
@@ -174,10 +151,8 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         system.keyLength = Integer.parseInt(doc.getElementsByTagName(XML_KEYLENGTH_NAME).item(0).getTextContent());
 
         system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName(XML_LASTKEY_NAME).item(0).getTextContent());
-
-        
-        
-        NodeList nList = doc.getElementsByTagName("a");
+       
+        NodeList nList = doc.getElementsByTagName(Agent.XML_AGENT_NAME);
         system.agents = new HashMap();
 
         for(int i = 0; i < nList.getLength(); i++) {

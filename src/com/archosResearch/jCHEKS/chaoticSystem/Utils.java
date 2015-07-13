@@ -11,9 +11,7 @@ public class Utils {
     public static final String DEFAULT_ENCODING = "UTF-8";
     
     public static int GetRandomInt(int bound, Random random) {
-        int result = 0;
-
-        result = random.nextInt(bound + 1);
+        int result = random.nextInt(bound + 1);
         
         return result;
     }
@@ -32,14 +30,12 @@ public class Utils {
     }
     
     private static int GetRandInt(Range range, Random random) {
-        return random.nextInt((range.max - range.min) + 1) + range.min;
+        return random.nextInt((range.getMax() - range.getMin()) + 1) + range.getMin();
     }
 
     public static boolean QuarterShot(Random random) {
-        int result = 0;
-
-        result = random.nextInt(2);
-
+        int result = random.nextInt(2);
+        
         return result == 0;
     }
     

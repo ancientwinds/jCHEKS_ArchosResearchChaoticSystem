@@ -1,9 +1,7 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 import java.util.*;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 /**
  *
@@ -20,7 +18,6 @@ public class RuleSet implements Cloneable {
     private static final String XML_LEVEL_NAME = "l";
     private static final String XML_RULES_NAME = "rules";
 
-
     public int getLevel() {
         return this.level;
     }
@@ -33,25 +30,6 @@ public class RuleSet implements Cloneable {
         return this.rules;
     }
 
-    /*public RuleSet(int level, int maxImpact, int ruleCount, int agentCount, Random random) {
-        this.initializeLists();
-
-        this.level = level;
-        this.selfImpact = Utils.GetRandomInt(maxImpact, random);
-        //TODO Avoid 0 in random generation.
-        if (this.selfImpact == 0) {
-            this.selfImpact++;
-        }
-        if (Utils.QuarterShot(random)) {
-            this.selfImpact *= -1;
-        }
-
-        // Ajouter les relations
-        for (int x = 0; x < ruleCount; x++) {
-            this.rules.add(new Rule(Utils.GetRandomInt(agentCount, random), maxImpact, random));
-        }
-    }*/
-    
     public RuleSet(int level, Range impactRange, Range delayRange, int ruleCount, int agentCount, Random random) {
         this.initializeLists();
 
