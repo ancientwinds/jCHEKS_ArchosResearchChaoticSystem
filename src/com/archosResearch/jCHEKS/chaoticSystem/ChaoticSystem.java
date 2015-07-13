@@ -2,9 +2,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
-import com.archosResearch.jCHEKS.concept.exception.ChaoticSystemException;
 import java.io.*;
-import java.security.*;
 import java.util.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
@@ -25,15 +23,15 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     private byte[] toGenerateKey;
     private int toGenerateKeyIndex;
     
-    private int minImpact;
-    private int maxImpact;
-    private int minKeyPart;
-    private int maxKeyPart;
-    private int maxDelay;
-    
     private Range impactRange;
     private Range keyPartRange;
     private Range delayRange;
+    
+    private static final String XML_CHAOTICSYSTEM_NAME = "cs";
+    private static final String XML_SYSTEMID_NAME = "si";
+    private static final String XML_KEYLENGTH_NAME = "kl";
+    private static final String XML_LASTKEY_NAME = "lk";
+    private static final String XML_AGENTS_NAME = "as";
 
     public HashMap<Integer, Agent> getAgents() {
         return this.agents;
@@ -172,10 +170,10 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         Document doc = dBuilder.parse(is);
         
         doc.getDocumentElement().normalize();
-        system.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
-        system.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
+        system.systemId = doc.getElementsByTagName(XML_SYSTEMID_NAME).item(0).getTextContent();
+        system.keyLength = Integer.parseInt(doc.getElementsByTagName(XML_KEYLENGTH_NAME).item(0).getTextContent());
 
-        system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
+        system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName(XML_LASTKEY_NAME).item(0).getTextContent());
 
         NodeList nList = doc.getElementsByTagName("agent");
         system.agents = new HashMap();
@@ -195,27 +193,25 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("chaoticSystem");
+            Element rootElement = doc.createElement(XML_CHAOTICSYSTEM_NAME);
             doc.appendChild(rootElement);
 
-            Element systemIdElement = doc.createElement("systemId");
+            Element systemIdElement = doc.createElement(XML_SYSTEMID_NAME);
             systemIdElement.appendChild(doc.createTextNode(this.systemId));
             rootElement.appendChild(systemIdElement);
 
-            Element keyLengthElement = doc.createElement("keyLength");
+            Element keyLengthElement = doc.createElement(XML_KEYLENGTH_NAME);
             keyLengthElement.appendChild(doc.createTextNode(Integer.toString(this.keyLength)));
             rootElement.appendChild(keyLengthElement);
 
-            Element lastKey = doc.createElement("lastKey");
+            Element lastKey = doc.createElement(XML_LASTKEY_NAME);
             lastKey.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedKey)));
             rootElement.appendChild(lastKey);
 
-            Element agentsElement = doc.createElement("agents");
+            Element agentsElement = doc.createElement(XML_AGENTS_NAME);
 
             this.agents.entrySet().forEach((a) -> {
-                Element agent = doc.createElement("agent");
-                agent.appendChild(doc.createTextNode(((Agent) a.getValue()).serialize()));
-                agentsElement.appendChild(agent);
+                agentsElement.appendChild(a.getValue().serializeXml(rootElement));
             });
 
             rootElement.appendChild(agentsElement);
@@ -223,6 +219,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             DOMSource domSource = new DOMSource(doc);
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
+            //StreamResult result = new StreamResult(new File("system\temp.xml"));
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
             transformer.transform(domSource, result);

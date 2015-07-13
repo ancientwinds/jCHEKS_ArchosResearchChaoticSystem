@@ -1,6 +1,8 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 import java.util.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -11,6 +13,12 @@ public class RuleSet implements Cloneable {
     private int level;
     private int selfImpact;
     private ArrayList<Rule> rules;
+    
+    private static final String XML_RULESET_NAME = "rs";
+    private static final String XML_SELFIMPACT_NAME = "si";
+    private static final String XML_LEVEL_NAME = "l";
+    private static final String XML_RULES_NAME = "rules";
+
 
     public int getLevel() {
         return this.level;
@@ -68,7 +76,31 @@ public class RuleSet implements Cloneable {
             this.rules.add(new Rule(s));
         }
     }
+    
+    public Element serializeXml(Element root) {
+        Document doc = root.getOwnerDocument();
+        
+        Element ruleSetElement = doc.createElement(XML_RULESET_NAME);
 
+        Element selfImpactElement = doc.createElement(XML_SELFIMPACT_NAME);
+        selfImpactElement.appendChild(doc.createTextNode(Integer.toString(this.selfImpact)));
+        ruleSetElement.appendChild(selfImpactElement);
+
+        Element levelElement = doc.createElement(XML_LEVEL_NAME);
+        levelElement.appendChild(doc.createTextNode(Integer.toString(this.level)));
+        ruleSetElement.appendChild(levelElement);
+
+        Element rulesElement = doc.createElement(XML_RULES_NAME);
+
+        for (Rule rule : this.rules) {
+            rulesElement.appendChild(rule.serializeXml(rulesElement));
+        }
+
+        ruleSetElement.appendChild(rulesElement);
+        
+        return ruleSetElement;
+    }
+    
     @Override
     public RuleSet clone() throws CloneNotSupportedException {
         RuleSet ruleSetClone = (RuleSet) super.clone();

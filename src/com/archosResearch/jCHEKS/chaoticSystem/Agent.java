@@ -2,6 +2,8 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 import java.util.*;
 import java.util.Map.Entry;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -16,7 +18,24 @@ public class Agent implements Cloneable {
     
     private HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
     private HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
+    
+    private static final String XML_AGENT_NAME = "a";
+    private static final String XML_AGENTID_NAME = "ai";
+    private static final String XML_KEYPART_NAME = "kp";
+    private static final String XML_KEYPART_RANGE_NAME = "kpr";
+    private static final String XML_KEYPART_MIN_NAME = "min";
+    private static final String XML_KEYPART_MAX_NAME = "max";
+    private static final String XML_RULESETS_NAME = "rss";
+    private static final String XML_RULESET_NAME = "ruleset";
+    private static final String XML_RULETOKEY_NAME = "rsk";
+    private static final String XML_PENDINGIMPACTS_NAME = "pis";
+    private static final String XML_PENDINGIMPACT_NAME = "pi";
+    private static final String XML_IMPACT_NAME = "im";
+    private static final String XML_DELAY_NAME = "de";
+    
 
+
+    
     public int getAgentId() {
         return this.agentId;
     }
@@ -203,5 +222,59 @@ public class Agent implements Cloneable {
         });
 
         return sb.toString();
+    }
+    
+    public Element serializeXml(Element root) {
+  
+        Document doc = root.getOwnerDocument();
+        Element rootElement = doc.createElement(XML_AGENT_NAME);
+
+        Element systemIdElement = doc.createElement(XML_AGENTID_NAME);
+        systemIdElement.appendChild(doc.createTextNode(Integer.toString(this.agentId)));
+        rootElement.appendChild(systemIdElement);
+
+        Element keyLengthElement = doc.createElement(XML_KEYPART_NAME);
+        keyLengthElement.appendChild(doc.createTextNode(Integer.toString(this.keyPart)));
+        rootElement.appendChild(keyLengthElement);
+
+        Element keyPartRangeElement = doc.createElement(XML_KEYPART_RANGE_NAME);
+        Element min = doc.createElement(XML_KEYPART_MIN_NAME);
+        Element max = doc.createElement(XML_KEYPART_MAX_NAME);
+        min.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.min)));
+        max.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.max)));
+        keyPartRangeElement.appendChild(min);
+        keyPartRangeElement.appendChild(max);        
+        rootElement.appendChild(keyPartRangeElement);
+
+        Element ruleSetElement = doc.createElement(XML_RULESETS_NAME);
+        Iterator it = this.ruleSets.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, RuleSet> pair = (Map.Entry)it.next();
+            Element ruleSet = doc.createElement(XML_RULESET_NAME);
+            Element ruleSetKeyPart = doc.createElement(XML_RULETOKEY_NAME);            
+            ruleSetKeyPart.appendChild(doc.createTextNode(Integer.toString(pair.getKey())));
+            ruleSet.appendChild(pair.getValue().serializeXml(ruleSetElement));
+            ruleSet.appendChild(ruleSetKeyPart);
+            ruleSetElement.appendChild(ruleSet);
+        }
+        rootElement.appendChild(ruleSetElement);
+
+        
+        Element pendingImpactsElement = doc.createElement(XML_PENDINGIMPACTS_NAME);
+        Iterator pending = this.pendingImpacts.entrySet().iterator();
+        while (pending.hasNext()) {
+            Map.Entry<Integer, Integer> pair = (Map.Entry)pending.next();
+            Element pendingImpact = doc.createElement(XML_PENDINGIMPACT_NAME);
+            Element impact = doc.createElement(XML_IMPACT_NAME);
+            Element delay = doc.createElement(XML_DELAY_NAME);
+            impact.appendChild(doc.createTextNode(Integer.toString(pair.getKey())));
+            delay.appendChild(doc.createTextNode(Integer.toString(pair.getValue())));
+            pendingImpact.appendChild(impact);
+            pendingImpact.appendChild(delay);
+            pendingImpactsElement.appendChild(pendingImpact);
+        } 
+        rootElement.appendChild(pendingImpactsElement);
+
+        return rootElement;
     }
 }
