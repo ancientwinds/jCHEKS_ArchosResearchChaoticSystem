@@ -9,9 +9,9 @@ import org.w3c.dom.*;
  */
 public class Rule implements Cloneable{
 
-    private int destination;
-    private int impact;
-    private int delay;
+    protected int destination;
+    protected int impact;
+    protected int delay;
     
     public static final String XML_RULE_NAME = "r";
     private static final String XML_DESTINATION_NAME = "d";
@@ -37,7 +37,7 @@ public class Rule implements Cloneable{
         this.delay = Utils.GetRandomInt(delayRange, random);
     }
     
-    private Rule() {}
+    protected Rule() {}
 
     public Rule(String serialization)
     {

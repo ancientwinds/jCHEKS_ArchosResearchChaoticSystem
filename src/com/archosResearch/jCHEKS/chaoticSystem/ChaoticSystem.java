@@ -17,21 +17,24 @@ import org.w3c.dom.*;
  */
 public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
-    private HashMap<Integer, Agent> agents = new HashMap();
-    private int lastGeneratedKeyIndex;
-    private AbstractChaoticSystem currentClone;
-    private byte[] toGenerateKey;
-    private int toGenerateKeyIndex;
+    protected HashMap<Integer, Agent> agents = new HashMap();
+    protected int lastGeneratedKeyIndex;
+    protected AbstractChaoticSystem currentClone;
+    protected byte[] toGenerateKey;
+    protected int toGenerateKeyIndex;
     
-    private Range impactRange;
-    private Range keyPartRange;
-    private Range delayRange;
+    protected Range impactRange;
+    protected Range keyPartRange;
+    protected Range delayRange;
     
     private static final String XML_CHAOTICSYSTEM_NAME = "cs";
     private static final String XML_SYSTEMID_NAME = "si";
     private static final String XML_KEYLENGTH_NAME = "kl";
     private static final String XML_LASTKEY_NAME = "lk";
-    private static final String XML_AGENTS_NAME = "as";
+    private static final String XML_AGENTS_NAME = "as";    
+    private static final String XML_KEYPART_RANGE_NAME = "kpr";
+    private static final String XML_KEYPART_MIN_NAME = "min";
+    private static final String XML_KEYPART_MAX_NAME = "max";
 
     public HashMap<Integer, Agent> getAgents() {
         return this.agents;
@@ -152,12 +155,16 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
         system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName(XML_LASTKEY_NAME).item(0).getTextContent());
        
+        int min = Integer.parseInt(doc.getElementsByTagName(XML_KEYPART_MIN_NAME).item(0).getTextContent());
+        int max = Integer.parseInt(doc.getElementsByTagName(XML_KEYPART_MAX_NAME).item(0).getTextContent());
+        system.keyPartRange = new Range(min, max);
+        
         NodeList nList = doc.getElementsByTagName(Agent.XML_AGENT_NAME);
         system.agents = new HashMap();
 
         for(int i = 0; i < nList.getLength(); i++) {
             Node element = nList.item(i);
-            Agent tempAgent = new Agent((Element) element);
+            Agent tempAgent = new Agent((Element) element, system.keyPartRange);
             system.agents.put(tempAgent.getAgentId(), tempAgent);
         }
         
@@ -185,6 +192,15 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             lastKey.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedKey)));
             rootElement.appendChild(lastKey);
 
+            Element keyPartRangeElement = doc.createElement(XML_KEYPART_RANGE_NAME);
+            Element min = doc.createElement(XML_KEYPART_MIN_NAME);
+            Element max = doc.createElement(XML_KEYPART_MAX_NAME);
+            min.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMin())));
+            max.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMax())));
+            keyPartRangeElement.appendChild(min);
+            keyPartRangeElement.appendChild(max);        
+            rootElement.appendChild(keyPartRangeElement);
+            
             Element agentsElement = doc.createElement(XML_AGENTS_NAME);
 
             this.agents.entrySet().forEach((a) -> {

@@ -10,23 +10,19 @@ import org.w3c.dom.*;
  */
 public class Agent implements Cloneable {
 
-    private int agentId;
-    private int keyPart;
+    protected int agentId;
+    protected int keyPart;
     
-    private Range keyPartRange;
+    protected Range keyPartRange;
     
-    private HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
-    private HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
+    protected HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
+    protected HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
     
     public static final String XML_AGENT_NAME = "a";
     private static final String XML_AGENTID_NAME = "ai";
     private static final String XML_KEYPART_NAME = "kp";
-    private static final String XML_KEYPART_RANGE_NAME = "kpr";
-    private static final String XML_KEYPART_MIN_NAME = "min";
-    private static final String XML_KEYPART_MAX_NAME = "max";
+
     private static final String XML_RULESETS_NAME = "rss";
-    private static final String XML_RULESET_NAME = "ruleset";
-    private static final String XML_RULETOKEY_NAME = "rsk";
     private static final String XML_PENDINGIMPACTS_NAME = "pis";
     private static final String XML_PENDINGIMPACT_NAME = "pi";
     private static final String XML_IMPACT_NAME = "im";
@@ -48,12 +44,14 @@ public class Agent implements Cloneable {
         return this.ruleSets;
     }
    
+    protected Agent() {}
+    
     public Agent(int agentId, Range impactRange, Range keyPartRange, Range delayRange, int ruleCount, int agentCount, Random random) {
         
         this.keyPartRange = keyPartRange;
         
         this.agentId = agentId;
-        this.keyPart = Utils.GetRandomInt(keyPart, random);
+        this.keyPart = Utils.GetRandomInt(keyPartRange, random);
 
         for (int i = this.keyPartRange.getMin(); i < (this.keyPartRange.getMax() + 1); i++) {
             this.ruleSets.put(i, new RuleSet(i, impactRange, delayRange, ruleCount, agentCount, random));
@@ -81,23 +79,20 @@ public class Agent implements Cloneable {
         }
     }
     
-    public Agent(Element element) {
+    public Agent(Element element, Range keyPartRange) {
         this.agentId = Integer.parseInt(element.getElementsByTagName(XML_AGENTID_NAME).item(0).getTextContent());
         this.keyPart = Integer.parseInt(element.getElementsByTagName(XML_KEYPART_NAME).item(0).getTextContent());
-    
-        int min = Integer.parseInt(element.getElementsByTagName(XML_KEYPART_MIN_NAME).item(0).getTextContent());
-        int max = Integer.parseInt(element.getElementsByTagName(XML_KEYPART_MAX_NAME).item(0).getTextContent());
-        this.keyPartRange = new Range(min, max);
         
-        NodeList ruleSetList = element.getElementsByTagName(XML_RULESET_NAME);
+        this.keyPartRange = keyPartRange;
+        
+        NodeList ruleSetList = element.getElementsByTagName(RuleSet.XML_RULESET_NAME);
         this.ruleSets = new HashMap();
 
         for(int i = 0; i < ruleSetList.getLength(); i++) {
             Element node = (Element) ruleSetList.item(i);
             
-            int ruleToKey = Integer.parseInt(node.getElementsByTagName(XML_RULETOKEY_NAME).item(0).getTextContent());
             RuleSet ruleSet = new RuleSet(node);
-            this.ruleSets.put(ruleToKey, ruleSet);
+            this.ruleSets.put(ruleSet.getLevel(), ruleSet);
         }
         
         NodeList pendingImpactsList = element.getElementsByTagName(XML_PENDINGIMPACT_NAME);
@@ -110,8 +105,7 @@ public class Agent implements Cloneable {
             int delay = Integer.parseInt(node.getElementsByTagName(XML_DELAY_NAME).item(0).getTextContent());
 
             this.pendingImpacts.put(delay, impact);
-        }
-    
+        }    
     }
 
     @Override
@@ -254,25 +248,11 @@ public class Agent implements Cloneable {
         keyLengthElement.appendChild(doc.createTextNode(Integer.toString(this.keyPart)));
         rootElement.appendChild(keyLengthElement);
 
-        Element keyPartRangeElement = doc.createElement(XML_KEYPART_RANGE_NAME);
-        Element min = doc.createElement(XML_KEYPART_MIN_NAME);
-        Element max = doc.createElement(XML_KEYPART_MAX_NAME);
-        min.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMin())));
-        max.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMax())));
-        keyPartRangeElement.appendChild(min);
-        keyPartRangeElement.appendChild(max);        
-        rootElement.appendChild(keyPartRangeElement);
-
         Element ruleSetElement = doc.createElement(XML_RULESETS_NAME);
         Iterator it = this.ruleSets.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, RuleSet> pair = (Map.Entry)it.next();
-            Element ruleSet = doc.createElement(XML_RULESET_NAME);
-            Element ruleSetKeyPart = doc.createElement(XML_RULETOKEY_NAME);            
-            ruleSetKeyPart.appendChild(doc.createTextNode(Integer.toString(pair.getKey())));
-            ruleSet.appendChild(pair.getValue().serializeXml(ruleSetElement));
-            ruleSet.appendChild(ruleSetKeyPart);
-            ruleSetElement.appendChild(ruleSet);
+            ruleSetElement.appendChild(pair.getValue().serializeXml(ruleSetElement));
         }
         rootElement.appendChild(ruleSetElement);
         

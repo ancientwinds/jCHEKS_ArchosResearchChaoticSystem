@@ -9,11 +9,11 @@ import org.w3c.dom.*;
  */
 public class RuleSet implements Cloneable {
 
-    private int level;
-    private int selfImpact;
-    private ArrayList<Rule> rules;
+    protected int level;
+    protected int selfImpact;
+    protected ArrayList<Rule> rules;
     
-    private static final String XML_RULESET_NAME = "rs";
+    public static final String XML_RULESET_NAME = "rs";
     private static final String XML_SELFIMPACT_NAME = "si";
     private static final String XML_LEVEL_NAME = "l";
     private static final String XML_RULES_NAME = "rules";
@@ -30,6 +30,10 @@ public class RuleSet implements Cloneable {
         return this.rules;
     }
 
+    protected RuleSet() { 
+        this.initializeLists();
+    }
+    
     public RuleSet(int level, Range impactRange, Range delayRange, int ruleCount, int agentCount, Random random) {
         this.initializeLists();
 
@@ -37,6 +41,7 @@ public class RuleSet implements Cloneable {
         this.selfImpact = Utils.GetRandomIntAvoidingZero(impactRange, random);
         
         for (int x = 0; x < ruleCount; x++) {
+            //TODO Check if agent can have a self impact and a rule on himself.
             this.rules.add(new Rule(Utils.GetRandomInt(agentCount, random), impactRange, delayRange, random));
         }
     }
