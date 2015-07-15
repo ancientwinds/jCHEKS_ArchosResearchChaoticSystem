@@ -1,6 +1,5 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
-import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.*;
@@ -13,7 +12,7 @@ public class FileReader {
     
     private static final String chaoticSystemDir = "system/";
     
-    public static AbstractChaoticSystem readChaoticSystem(String fileName) throws Exception {
+    public static ChaoticSystem readChaoticSystem(String fileName) throws Exception {
         File dir = new File(chaoticSystemDir);
         dir.mkdirs();
         String fileToSave = chaoticSystemDir + fileName;

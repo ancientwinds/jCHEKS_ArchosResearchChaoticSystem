@@ -2,9 +2,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
-import com.archosResearch.jCHEKS.concept.exception.ChaoticSystemException;
 import java.io.*;
-import java.security.*;
 import java.util.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
@@ -19,11 +17,27 @@ import org.w3c.dom.*;
  */
 public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
-    private HashMap<Integer, Agent> agents = new HashMap();
-    private int lastGeneratedKeyIndex;
-    private AbstractChaoticSystem currentClone;
-    private byte[] toGenerateKey;
-    private int toGenerateKeyIndex;
+    protected HashMap<Integer, Agent> agents = new HashMap();
+    protected int lastGeneratedKeyIndex;
+    protected AbstractChaoticSystem currentClone;
+    protected byte[] toGenerateKey;
+    protected int toGenerateKeyIndex;
+    
+    protected Range impactRange;
+    protected Range keyPartRange;
+    protected Range delayRange;
+    
+    private static final String XML_CHAOTICSYSTEM_NAME = "cs";
+    private static final String XML_SYSTEMID_NAME = "si";
+    private static final String XML_KEYLENGTH_NAME = "kl";
+    private static final String XML_LASTKEY_NAME = "lk";
+    private static final String XML_AGENTS_NAME = "as";    
+    private static final String XML_KEYPART_RANGE_NAME = "kpr";
+    private static final String XML_RANGE_MIN_NAME = "min";
+    private static final String XML_RANGE_MAX_NAME = "max";
+    
+    private static final String XML_IMPACT_RANGE_NAME = "ir";
+    private static final String XML_DELAY_RANGE_NAME = "dr";
 
     public HashMap<Integer, Agent> getAgents() {
         return this.agents;
@@ -31,28 +45,17 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
     protected ChaoticSystem() {}
     
-    public ChaoticSystem(int keyLength) throws ChaoticSystemException {
-        super(keyLength);
-        try {
-            this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
-        } catch (NoSuchAlgorithmException ex) {
-            throw new ChaoticSystemException("Can't not use the secure random.", ex);
-        }    }
-    
-    public ChaoticSystem(int keyLength, String systemId) throws ChaoticSystemException {
-        super(keyLength, systemId);
-        try {
-            this.generateSystem(this.keyLength, SecureRandom.getInstance("SHA1PRNG"));
-        } catch (NoSuchAlgorithmException ex) {
-            throw new ChaoticSystemException("Can't not use the secure random.", ex);
-        }
-    }
-    
-    public ChaoticSystem(int keyLength, Random random) throws ChaoticSystemException {
-        super(keyLength, UUID.nameUUIDFromBytes(Integer.toString(random.nextInt()).getBytes()).toString()); 
+    public ChaoticSystem(int keyLength, String systemId, Range impactRange, Range keyPartRange, Range delayRange, Random random) throws KeyLenghtException {
+        this.keyLength = keyLength;
+        this.systemId = systemId;
+        
+        this.impactRange = impactRange;
+        this.keyPartRange = keyPartRange;
+        this.delayRange = delayRange;
+        
         this.generateSystem(this.keyLength, random);
     }
-
+        
     @Override
     public void evolveSystem(int factor) {
         
@@ -117,6 +120,11 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         sb.append("!");
         sb.append(Utils.ByteArrayToString(this.lastGeneratedKey));
         sb.append("!");
+        sb.append(Integer.toString(this.keyPartRange.getMin()));
+        sb.append(":");
+        sb.append(Integer.toString(this.keyPartRange.getMax()));
+        sb.append("!");
+
         this.agents.entrySet().forEach((a) -> {
             sb.append("A");
             sb.append(((Agent) a.getValue()).serialize());
@@ -132,11 +140,14 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         this.systemId = values[0];
         this.keyLength = Integer.parseInt(values[1]);
         this.lastGeneratedKey = Utils.StringToByteArray(values[2]);
-
+        
+        String[] minMax = values[3].split(":");
+        this.keyPartRange = new Range(Integer.parseInt(minMax[0]), Integer.parseInt(minMax[1]));
+        
         this.agents = new HashMap();
-        String[] agentValues = values[3].substring(1).split("A");
+        String[] agentValues = values[4].substring(1).split("A");
         for (String agentString : agentValues) {
-            Agent tempAgent = new Agent(agentString);
+            Agent tempAgent = new Agent(agentString, this.keyPartRange);
             this.agents.put(tempAgent.getAgentId(), tempAgent);
         }
     }
@@ -150,19 +161,36 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         Document doc = dBuilder.parse(is);
         
         doc.getDocumentElement().normalize();
-        system.systemId = doc.getElementsByTagName("systemId").item(0).getTextContent();
-        system.keyLength = Integer.parseInt(doc.getElementsByTagName("keyLength").item(0).getTextContent());
+        system.systemId = doc.getElementsByTagName(XML_SYSTEMID_NAME).item(0).getTextContent();
+        system.keyLength = Integer.parseInt(doc.getElementsByTagName(XML_KEYLENGTH_NAME).item(0).getTextContent());
 
-        system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName("lastKey").item(0).getTextContent());
-
-        NodeList nList = doc.getElementsByTagName("agent");
+        system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName(XML_LASTKEY_NAME).item(0).getTextContent());
+       
+        Element keyPartRange = (Element) doc.getElementsByTagName(XML_KEYPART_RANGE_NAME).item(0);
+        int min = Integer.parseInt(keyPartRange.getElementsByTagName(XML_RANGE_MIN_NAME).item(0).getTextContent());
+        int max = Integer.parseInt(keyPartRange.getElementsByTagName(XML_RANGE_MAX_NAME).item(0).getTextContent());
+        system.keyPartRange = new Range(min, max);
+        
+        Element impactRange = (Element) doc.getElementsByTagName(XML_IMPACT_RANGE_NAME).item(0);
+        min = Integer.parseInt(impactRange.getElementsByTagName(XML_RANGE_MIN_NAME).item(0).getTextContent());
+        max = Integer.parseInt(impactRange.getElementsByTagName(XML_RANGE_MAX_NAME).item(0).getTextContent());
+        system.impactRange = new Range(min, max); 
+        
+        Element delayRange = (Element) doc.getElementsByTagName(XML_DELAY_RANGE_NAME).item(0);
+        min = Integer.parseInt(delayRange.getElementsByTagName(XML_RANGE_MIN_NAME).item(0).getTextContent());
+        max = Integer.parseInt(delayRange.getElementsByTagName(XML_RANGE_MAX_NAME).item(0).getTextContent());
+        system.delayRange = new Range(min, max);
+        
+        NodeList nList = doc.getElementsByTagName(Agent.XML_AGENT_NAME);
         system.agents = new HashMap();
 
         for(int i = 0; i < nList.getLength(); i++) {
             Node element = nList.item(i);
-            Agent tempAgent = new Agent(element.getTextContent());
+            Agent tempAgent = new Agent((Element) element, system.keyPartRange);
             system.agents.put(tempAgent.getAgentId(), tempAgent);
         }
+        
+        system.buildKey();
         
         return system;
     }
@@ -173,34 +201,63 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("chaoticSystem");
+            Element rootElement = doc.createElement(XML_CHAOTICSYSTEM_NAME);
             doc.appendChild(rootElement);
 
-            Element systemIdElement = doc.createElement("systemId");
+            Element systemIdElement = doc.createElement(XML_SYSTEMID_NAME);
             systemIdElement.appendChild(doc.createTextNode(this.systemId));
             rootElement.appendChild(systemIdElement);
 
-            Element keyLengthElement = doc.createElement("keyLength");
+            Element keyLengthElement = doc.createElement(XML_KEYLENGTH_NAME);
             keyLengthElement.appendChild(doc.createTextNode(Integer.toString(this.keyLength)));
             rootElement.appendChild(keyLengthElement);
 
-            Element lastKey = doc.createElement("lastKey");
+            Element lastKey = doc.createElement(XML_LASTKEY_NAME);
             lastKey.appendChild(doc.createTextNode(Utils.ByteArrayToString(this.lastGeneratedKey)));
             rootElement.appendChild(lastKey);
 
-            Element agentsElement = doc.createElement("agents");
+            Element keyPartRangeElement = doc.createElement(XML_KEYPART_RANGE_NAME);
+            Element min = doc.createElement(XML_RANGE_MIN_NAME);
+            Element max = doc.createElement(XML_RANGE_MAX_NAME);
+            min.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMin())));
+            max.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMax())));
+            keyPartRangeElement.appendChild(min);
+            keyPartRangeElement.appendChild(max);        
+            rootElement.appendChild(keyPartRangeElement);
+            
+            Element impactRangeElement = doc.createElement(XML_IMPACT_RANGE_NAME);
+            min = doc.createElement(XML_RANGE_MIN_NAME);
+            max = doc.createElement(XML_RANGE_MAX_NAME);
+            min.appendChild(doc.createTextNode(Integer.toString(this.impactRange.getMin())));
+            max.appendChild(doc.createTextNode(Integer.toString(this.impactRange.getMax())));
+            impactRangeElement.appendChild(min);
+            impactRangeElement.appendChild(max);        
+            rootElement.appendChild(impactRangeElement);
+            
+            Element delayRangeElement = doc.createElement(XML_DELAY_RANGE_NAME);
+            min = doc.createElement(XML_RANGE_MIN_NAME);
+            max = doc.createElement(XML_RANGE_MAX_NAME);
+            min.appendChild(doc.createTextNode(Integer.toString(this.delayRange.getMin())));
+            max.appendChild(doc.createTextNode(Integer.toString(this.delayRange.getMax())));
+            delayRangeElement.appendChild(min);
+            delayRangeElement.appendChild(max);        
+            rootElement.appendChild(delayRangeElement);
+            
+            Element agentsElement = doc.createElement(XML_AGENTS_NAME);
 
-            this.agents.entrySet().forEach((a) -> {
-                Element agent = doc.createElement("agent");
-                agent.appendChild(doc.createTextNode(((Agent) a.getValue()).serialize()));
-                agentsElement.appendChild(agent);
-            });
+            for(int i = 0; i < this.agents.size(); i++) {
+                agentsElement.appendChild(this.agents.get(i).serializeXml(rootElement));
+            }
+            /*this.agents.entrySet().forEach((a) -> {
+                agentsElement.appendChild(a.getValue().serializeXml(rootElement));
+            });*/
 
             rootElement.appendChild(agentsElement);
             
             DOMSource domSource = new DOMSource(doc);
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
+            //StreamResult result = new StreamResult(new File("system\temp.xml"));
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
             transformer.transform(domSource, result);
@@ -222,7 +279,8 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         //TODO We might want another extra for the cipherCheck
         int numberOfAgents = this.keyLength / Byte.SIZE;
         for (int i = 0; i < numberOfAgents; i++) {
-            this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1, random));
+            //this.agents.put(i, new Agent(i, this.maxImpact, numberOfAgents, numberOfAgents - 1, random));
+            this.agents.put(i, new Agent(i, this.impactRange, this.keyPartRange, this.delayRange, numberOfAgents, numberOfAgents - 1, random));
         }
 
         this.buildKey();
