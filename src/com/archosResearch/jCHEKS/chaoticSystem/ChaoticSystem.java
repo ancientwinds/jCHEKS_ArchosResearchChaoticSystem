@@ -33,8 +33,11 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     private static final String XML_LASTKEY_NAME = "lk";
     private static final String XML_AGENTS_NAME = "as";    
     private static final String XML_KEYPART_RANGE_NAME = "kpr";
-    private static final String XML_KEYPART_MIN_NAME = "min";
-    private static final String XML_KEYPART_MAX_NAME = "max";
+    private static final String XML_RANGE_MIN_NAME = "min";
+    private static final String XML_RANGE_MAX_NAME = "max";
+    
+    private static final String XML_IMPACT_RANGE_NAME = "ir";
+    private static final String XML_DELAY_RANGE_NAME = "dr";
 
     public HashMap<Integer, Agent> getAgents() {
         return this.agents;
@@ -117,6 +120,11 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         sb.append("!");
         sb.append(Utils.ByteArrayToString(this.lastGeneratedKey));
         sb.append("!");
+        sb.append(Integer.toString(this.keyPartRange.getMin()));
+        sb.append(":");
+        sb.append(Integer.toString(this.keyPartRange.getMax()));
+        sb.append("!");
+
         this.agents.entrySet().forEach((a) -> {
             sb.append("A");
             sb.append(((Agent) a.getValue()).serialize());
@@ -132,11 +140,14 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         this.systemId = values[0];
         this.keyLength = Integer.parseInt(values[1]);
         this.lastGeneratedKey = Utils.StringToByteArray(values[2]);
-
+        
+        String[] minMax = values[3].split(":");
+        this.keyPartRange = new Range(Integer.parseInt(minMax[0]), Integer.parseInt(minMax[1]));
+        
         this.agents = new HashMap();
-        String[] agentValues = values[3].substring(1).split("A");
+        String[] agentValues = values[4].substring(1).split("A");
         for (String agentString : agentValues) {
-            Agent tempAgent = new Agent(agentString);
+            Agent tempAgent = new Agent(agentString, this.keyPartRange);
             this.agents.put(tempAgent.getAgentId(), tempAgent);
         }
     }
@@ -155,9 +166,20 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
         system.lastGeneratedKey = Utils.StringToByteArray(doc.getElementsByTagName(XML_LASTKEY_NAME).item(0).getTextContent());
        
-        int min = Integer.parseInt(doc.getElementsByTagName(XML_KEYPART_MIN_NAME).item(0).getTextContent());
-        int max = Integer.parseInt(doc.getElementsByTagName(XML_KEYPART_MAX_NAME).item(0).getTextContent());
+        Element keyPartRange = (Element) doc.getElementsByTagName(XML_KEYPART_RANGE_NAME).item(0);
+        int min = Integer.parseInt(keyPartRange.getElementsByTagName(XML_RANGE_MIN_NAME).item(0).getTextContent());
+        int max = Integer.parseInt(keyPartRange.getElementsByTagName(XML_RANGE_MAX_NAME).item(0).getTextContent());
         system.keyPartRange = new Range(min, max);
+        
+        Element impactRange = (Element) doc.getElementsByTagName(XML_IMPACT_RANGE_NAME).item(0);
+        min = Integer.parseInt(impactRange.getElementsByTagName(XML_RANGE_MIN_NAME).item(0).getTextContent());
+        max = Integer.parseInt(impactRange.getElementsByTagName(XML_RANGE_MAX_NAME).item(0).getTextContent());
+        system.impactRange = new Range(min, max); 
+        
+        Element delayRange = (Element) doc.getElementsByTagName(XML_DELAY_RANGE_NAME).item(0);
+        min = Integer.parseInt(delayRange.getElementsByTagName(XML_RANGE_MIN_NAME).item(0).getTextContent());
+        max = Integer.parseInt(delayRange.getElementsByTagName(XML_RANGE_MAX_NAME).item(0).getTextContent());
+        system.delayRange = new Range(min, max);
         
         NodeList nList = doc.getElementsByTagName(Agent.XML_AGENT_NAME);
         system.agents = new HashMap();
@@ -167,6 +189,8 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             Agent tempAgent = new Agent((Element) element, system.keyPartRange);
             system.agents.put(tempAgent.getAgentId(), tempAgent);
         }
+        
+        system.buildKey();
         
         return system;
     }
@@ -193,19 +217,40 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             rootElement.appendChild(lastKey);
 
             Element keyPartRangeElement = doc.createElement(XML_KEYPART_RANGE_NAME);
-            Element min = doc.createElement(XML_KEYPART_MIN_NAME);
-            Element max = doc.createElement(XML_KEYPART_MAX_NAME);
+            Element min = doc.createElement(XML_RANGE_MIN_NAME);
+            Element max = doc.createElement(XML_RANGE_MAX_NAME);
             min.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMin())));
             max.appendChild(doc.createTextNode(Integer.toString(this.keyPartRange.getMax())));
             keyPartRangeElement.appendChild(min);
             keyPartRangeElement.appendChild(max);        
             rootElement.appendChild(keyPartRangeElement);
             
+            Element impactRangeElement = doc.createElement(XML_IMPACT_RANGE_NAME);
+            min = doc.createElement(XML_RANGE_MIN_NAME);
+            max = doc.createElement(XML_RANGE_MAX_NAME);
+            min.appendChild(doc.createTextNode(Integer.toString(this.impactRange.getMin())));
+            max.appendChild(doc.createTextNode(Integer.toString(this.impactRange.getMax())));
+            impactRangeElement.appendChild(min);
+            impactRangeElement.appendChild(max);        
+            rootElement.appendChild(impactRangeElement);
+            
+            Element delayRangeElement = doc.createElement(XML_DELAY_RANGE_NAME);
+            min = doc.createElement(XML_RANGE_MIN_NAME);
+            max = doc.createElement(XML_RANGE_MAX_NAME);
+            min.appendChild(doc.createTextNode(Integer.toString(this.delayRange.getMin())));
+            max.appendChild(doc.createTextNode(Integer.toString(this.delayRange.getMax())));
+            delayRangeElement.appendChild(min);
+            delayRangeElement.appendChild(max);        
+            rootElement.appendChild(delayRangeElement);
+            
             Element agentsElement = doc.createElement(XML_AGENTS_NAME);
 
-            this.agents.entrySet().forEach((a) -> {
+            for(int i = 0; i < this.agents.size(); i++) {
+                agentsElement.appendChild(this.agents.get(i).serializeXml(rootElement));
+            }
+            /*this.agents.entrySet().forEach((a) -> {
                 agentsElement.appendChild(a.getValue().serializeXml(rootElement));
-            });
+            });*/
 
             rootElement.appendChild(agentsElement);
             

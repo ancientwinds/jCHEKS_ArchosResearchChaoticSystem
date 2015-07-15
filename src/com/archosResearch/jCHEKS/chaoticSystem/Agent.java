@@ -35,6 +35,10 @@ public class Agent implements Cloneable {
     public byte getKeyPart() {
         return (byte) this.keyPart;
     }
+    
+    public Range getKeyPartRange() {
+        return this.keyPartRange;
+    }
 
     public HashMap<Integer, Integer> getPendingImpacts() {
         return this.pendingImpacts;
@@ -58,7 +62,8 @@ public class Agent implements Cloneable {
         }
     }
 
-    public Agent(String serialization) {
+    public Agent(String serialization, Range keyPartRange) {
+        this.keyPartRange = keyPartRange;
         String[] values = serialization.split("@");
 
         this.agentId = Integer.parseInt(values[0]);
