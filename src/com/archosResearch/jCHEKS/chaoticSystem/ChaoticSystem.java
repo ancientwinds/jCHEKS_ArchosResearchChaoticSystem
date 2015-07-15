@@ -64,7 +64,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         });
 
         this.agents.entrySet().stream().forEach((a) -> {
-            ((Agent) a.getValue()).evolve(factor, this.maxImpact);
+            ((Agent) a.getValue()).evolve(factor, this.impactRange.getMax());
         });
         
         this.buildKey();

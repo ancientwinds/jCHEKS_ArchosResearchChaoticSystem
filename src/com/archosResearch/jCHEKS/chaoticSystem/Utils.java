@@ -10,6 +10,11 @@ import java.util.Random;
 public class Utils {
     public static final String DEFAULT_ENCODING = "UTF-8";
     
+    public static void main(String[] args) throws Exception {
+        for(int i = 0; i < 1000; i++) {
+            System.out.println(GetRandInt(new Range(-128, 127), new Random()));
+        }
+    }
     public static int GetRandomInt(int bound, Random random) {
         int result = random.nextInt(bound + 1);
         

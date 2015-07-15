@@ -10,9 +10,11 @@ import java.util.*;
  */
 public class CryptoChaoticSystem extends ChaoticSystem{
 
-    private final static Range impactRange = new Range(0, 32);
+    private final static Range impactRange = new Range(-32, 32);
     private final static Range keyPartRange = new Range(-128, 127);
     private final static Range delayRange = new Range(0 ,4);
+    
+    protected CryptoChaoticSystem() { }
     
     public CryptoChaoticSystem(int keyLength, String systemId) throws KeyLenghtException, NoSuchAlgorithmException {
         super(keyLength, systemId, impactRange, keyPartRange, delayRange, SecureRandom.getInstance("SHA1PRNG"));

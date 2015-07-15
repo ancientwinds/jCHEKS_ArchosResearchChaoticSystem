@@ -172,12 +172,13 @@ public class Agent implements Cloneable {
         return this.ruleSets.get(this.keyPart);
     }
 
+    //TODO Revise this algo. 15/07/2015
     private int adjustKeyPart(int keyPart) {
         if (keyPart > this.keyPartRange.getMax()) {
-            keyPart = this.keyPartRange.getMin() + ((keyPart) % 127);
+            keyPart = this.keyPartRange.getMin() + ((keyPart) % this.keyPartRange.getMax());
         }
         if (keyPart < this.keyPartRange.getMin()) {
-            keyPart = this.keyPartRange.getMax() - ((keyPart * -1) % 128);
+            keyPart = this.keyPartRange.getMax() - ((keyPart * -1) % Math.abs(this.keyPartRange.getMin()));
         }
         return keyPart;
     }
