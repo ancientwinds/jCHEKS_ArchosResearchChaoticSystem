@@ -173,7 +173,7 @@ public class Agent implements Cloneable {
     }
 
     //TODO Revise this algo. 15/07/2015
-    private int adjustKeyPart(int keyPart) {
+    /*private int adjustKeyPart(int keyPart) {
         if (keyPart > this.keyPartRange.getMax()) {
             keyPart = this.keyPartRange.getMin() + ((keyPart) % this.keyPartRange.getMax());
         }
@@ -181,7 +181,7 @@ public class Agent implements Cloneable {
             keyPart = this.keyPartRange.getMax() - ((keyPart * -1) % Math.abs(this.keyPartRange.getMin()));
         }
         return keyPart;
-    }
+    }*/
 
     private void registerImpact(int impact, int delay) {
         if (!this.pendingImpacts.containsKey(delay)) {
@@ -214,7 +214,7 @@ public class Agent implements Cloneable {
         });
 
         this.pendingImpacts = tempImpacts;
-        this.keyPart = this.adjustKeyPart(this.keyPart);
+        this.keyPart = Utils.adjustNumber(keyPartRange, this.keyPart);
     }
 
     public String serialize() {
