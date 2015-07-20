@@ -70,7 +70,6 @@ public class Utils {
         if (number < range.getMin()) {            
             number2 =  range.getMax() + (number - range.getMax() - (rangeLength * ((number - range.getMax()) / rangeLength)));
         }
-        System.out.println("Adjusted: " + number + " to : " + number2);
 
         return number2;
     }
