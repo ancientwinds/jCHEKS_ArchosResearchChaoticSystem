@@ -377,7 +377,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         this.currentClone = (this.currentClone == null) ? cloneSystem() : this.currentClone;
     }
     
-    private void buildKey() {
+    protected void buildKey() {
         this.lastGeneratedKey = new byte[(this.keyLength / Byte.SIZE)];
 
         for (int i = 0; i < (this.keyLength / Byte.SIZE); i++) {

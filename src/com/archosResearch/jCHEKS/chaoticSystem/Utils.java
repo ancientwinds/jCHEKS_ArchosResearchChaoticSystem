@@ -62,16 +62,15 @@ public class Utils {
     public static int adjustNumber(Range range, int number) {
         
         int rangeLength = range.getMax() - range.getMin() + 1;
-        int number2 = number;
+
         if (number > range.getMax()) {  
-            number2 = range.getMin() + (number + Math.abs(range.getMin()) - (rangeLength * ((number + Math.abs(range.getMin())) / rangeLength)));
+            number = range.getMin() + (number + Math.abs(range.getMin()) - (rangeLength * ((number + Math.abs(range.getMin())) / rangeLength)));
                     
         }
         if (number < range.getMin()) {            
-            number2 =  range.getMax() + (number - range.getMax() - (rangeLength * ((number - range.getMax()) / rangeLength)));
+            number =  range.getMax() + (number - range.getMax() - (rangeLength * ((number - range.getMax()) / rangeLength)));
         }
-        System.out.println("Adjusted: " + number + " to : " + number2);
 
-        return number2;
+        return number;
     }
 }
