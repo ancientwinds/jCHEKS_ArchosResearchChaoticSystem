@@ -124,6 +124,14 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         sb.append(":");
         sb.append(Integer.toString(this.keyPartRange.getMax()));
         sb.append("!");
+        sb.append(Integer.toString(this.impactRange.getMin()));
+        sb.append(":");
+        sb.append(Integer.toString(this.impactRange.getMax()));
+        sb.append("!");
+        sb.append(Integer.toString(this.delayRange.getMin()));
+        sb.append(":");
+        sb.append(Integer.toString(this.delayRange.getMax()));
+        sb.append("!");
 
         this.agents.entrySet().forEach((a) -> {
             sb.append("A");
@@ -141,11 +149,17 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         this.keyLength = Integer.parseInt(values[1]);
         this.lastGeneratedKey = Utils.StringToByteArray(values[2]);
         
-        String[] minMax = values[3].split(":");
-        this.keyPartRange = new Range(Integer.parseInt(minMax[0]), Integer.parseInt(minMax[1]));
+        String[] minMaxKey = values[3].split(":");
+        this.keyPartRange = new Range(Integer.parseInt(minMaxKey[0]), Integer.parseInt(minMaxKey[1]));
+        
+        String[] minMaxImpact = values[4].split(":");
+        this.impactRange = new Range(Integer.parseInt(minMaxImpact[0]), Integer.parseInt(minMaxImpact[1]));
+        
+        String[] minMaxDelay = values[5].split(":");
+        this.delayRange = new Range(Integer.parseInt(minMaxDelay[0]), Integer.parseInt(minMaxDelay[1])); 
         
         this.agents = new HashMap();
-        String[] agentValues = values[4].substring(1).split("A");
+        String[] agentValues = values[6].substring(1).split("A");
         for (String agentString : agentValues) {
             Agent tempAgent = new Agent(agentString, this.keyPartRange);
             this.agents.put(tempAgent.getAgentId(), tempAgent);

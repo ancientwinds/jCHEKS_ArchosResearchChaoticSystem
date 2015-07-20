@@ -43,7 +43,9 @@ public class UtilsTest {
         assertEquals(127, Utils.adjustNumber(range, 127));
         assertEquals(-128, Utils.adjustNumber(range, 128));
         assertEquals(0, Utils.adjustNumber(range, 256));
-        assertEquals(-2, Utils.adjustNumber(range, 254));        
+        assertEquals(-2, Utils.adjustNumber(range, 254));
+        assertEquals(-128, Utils.adjustNumber(range, -384));        
+
     }
     
     @Test

@@ -18,6 +18,7 @@ public class CryptoChaoticSystem extends ChaoticSystem{
     
     public CryptoChaoticSystem(int keyLength, String systemId) throws KeyLenghtException, NoSuchAlgorithmException {
         super(keyLength, systemId, impactRange, keyPartRange, delayRange, SecureRandom.getInstance("SHA1PRNG"));
+        
     }
     
     public CryptoChaoticSystem(int keyLength, Random random) throws KeyLenghtException {
