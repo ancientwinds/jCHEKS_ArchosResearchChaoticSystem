@@ -96,4 +96,9 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
         this.keyList.add(new byte[]{1, 22, 3, 24, 5, 26, 7, 28, 9, 20, 11, 22, 13, 24, 15, 26});
         this.keyList.add(new byte[]{5,7, 8, 9, 10, 11, 12, 28, 19, 110, 44, 111, 67, 28, 75, 99});
     }
+    
+    @Override
+    public int getAgentsCount() {
+        return 0;
+    }
 }

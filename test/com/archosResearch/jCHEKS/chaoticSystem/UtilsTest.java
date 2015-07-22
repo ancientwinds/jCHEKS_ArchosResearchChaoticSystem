@@ -62,4 +62,16 @@ public class UtilsTest {
         assertEquals(-1, Utils.adjustNumber(range, -15));
     }
     
+    @Test
+    public void adjust_test_3() {
+        Range range = new Range(1, 4);
+        
+        assertEquals(1, Utils.adjustNumber(range, 5));
+        assertEquals(1, Utils.adjustNumber(range, 9));
+        assertEquals(4, Utils.adjustNumber(range, 0));
+        assertEquals(4, Utils.adjustNumber(range, -5));
+        assertEquals(4, Utils.adjustNumber(range, -9));
+
+    }
+    
 }

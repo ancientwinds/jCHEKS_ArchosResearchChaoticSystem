@@ -384,4 +384,9 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
             this.lastGeneratedKey[i] = ((Agent) this.agents.get(i)).getKeyPart();
         }
     }
+
+    @Override
+    public int getAgentsCount() {
+        return this.agents.size();
+    }
 }
