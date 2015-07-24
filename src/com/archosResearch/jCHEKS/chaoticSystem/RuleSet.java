@@ -1,5 +1,6 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
+import java.io.Serializable;
 import java.util.*;
 import org.w3c.dom.*;
 
@@ -7,7 +8,7 @@ import org.w3c.dom.*;
  *
  * @author jean-francois
  */
-public class RuleSet implements Cloneable {
+public class RuleSet implements Cloneable, Serializable{
 
     protected int level;
     protected int selfImpact;
@@ -153,6 +154,6 @@ public class RuleSet implements Cloneable {
     }
 
     private void initializeLists() {
-        this.rules = new ArrayList<>();
+        this.rules = new ArrayList();
     }
 }

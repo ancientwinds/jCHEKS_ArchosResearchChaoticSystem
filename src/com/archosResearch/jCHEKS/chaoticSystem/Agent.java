@@ -1,5 +1,6 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import org.w3c.dom.*;
@@ -8,7 +9,7 @@ import org.w3c.dom.*;
  *
  * @author jean-francois
  */
-public class Agent implements Cloneable {
+public class Agent implements Cloneable, Serializable{
 
     protected int agentId;
     protected int keyPart;

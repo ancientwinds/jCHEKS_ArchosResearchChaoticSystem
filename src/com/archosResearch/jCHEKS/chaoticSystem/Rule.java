@@ -1,5 +1,6 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
+import java.io.Serializable;
 import java.util.Random;
 import org.w3c.dom.*;
 
@@ -7,7 +8,7 @@ import org.w3c.dom.*;
  *
  * @author jean-francois
  */
-public class Rule implements Cloneable{
+public class Rule implements Cloneable, Serializable{
 
     protected int destination;
     protected int impact;
