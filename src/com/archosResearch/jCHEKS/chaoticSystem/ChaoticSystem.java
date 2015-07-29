@@ -309,23 +309,18 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     
     @Override
     public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         final ChaoticSystem other = (ChaoticSystem) obj;
-        if (!Objects.equals(this.agents, other.agents)) {
-            return false;
-        }
+        if (!Objects.equals(this.agents, other.agents)) return false;
         return true;
     }
     
-    public boolean isSameState(ChaoticSystem otherSystem) {
-        if (otherSystem == null) {
-            return false;
-        }
+    @Override
+    public boolean isSameState(AbstractChaoticSystem other) {
+        if (other == null) return false;
+        if (getClass() != other.getClass()) return false;
+        ChaoticSystem otherSystem = (ChaoticSystem)other;
         if(this.agents.keySet().size() != otherSystem.agents.entrySet().size()) return false;
         for (Map.Entry<Integer, Agent> entrySet : agents.entrySet()) {
             Integer key = entrySet.getKey();

@@ -49,6 +49,11 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
             
         return fullKey;        
     }
+
+    @Override
+    public boolean isSameState(AbstractChaoticSystem system) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     @Override
     public void resetSystem() {
