@@ -9,16 +9,16 @@ import org.w3c.dom.*;
  *
  * @author jean-francois
  */
-public class Agent implements Cloneable, Serializable{
+public class Agent implements Cloneable, Serializable {
 
     protected int agentId;
     protected int keyPart;
-    
+
     protected Range keyPartRange;
-    
+
     protected HashMap<Integer, Integer> pendingImpacts = new HashMap<>();
     protected HashMap<Integer, RuleSet> ruleSets = new HashMap<>();
-    
+
     public static final String XML_AGENT_NAME = "a";
     private static final String XML_AGENTID_NAME = "ai";
     private static final String XML_KEYPART_NAME = "kp";
@@ -28,7 +28,7 @@ public class Agent implements Cloneable, Serializable{
     private static final String XML_PENDINGIMPACT_NAME = "pi";
     private static final String XML_IMPACT_NAME = "im";
     private static final String XML_DELAY_NAME = "de";
-      
+
     public int getAgentId() {
         return this.agentId;
     }
@@ -36,7 +36,7 @@ public class Agent implements Cloneable, Serializable{
     public byte getKeyPart() {
         return (byte) this.keyPart;
     }
-    
+
     public Range getKeyPartRange() {
         return this.keyPartRange;
     }
@@ -48,13 +48,14 @@ public class Agent implements Cloneable, Serializable{
     public HashMap<Integer, RuleSet> getRuleSets() {
         return this.ruleSets;
     }
-   
-    protected Agent() {}
-    
+
+    protected Agent() {
+    }
+
     public Agent(int agentId, Range impactRange, Range keyPartRange, Range delayRange, int ruleCount, int agentCount, Random random) {
-        
+
         this.keyPartRange = keyPartRange;
-        
+
         this.agentId = agentId;
         this.keyPart = Utils.GetRandomInt(keyPartRange, random);
 
@@ -84,34 +85,34 @@ public class Agent implements Cloneable, Serializable{
             }
         }
     }
-    
+
     public Agent(Element element, Range keyPartRange) {
         this.agentId = Integer.parseInt(element.getElementsByTagName(XML_AGENTID_NAME).item(0).getTextContent());
         this.keyPart = Integer.parseInt(element.getElementsByTagName(XML_KEYPART_NAME).item(0).getTextContent());
-        
+
         this.keyPartRange = keyPartRange;
-        
+
         NodeList ruleSetList = element.getElementsByTagName(RuleSet.XML_RULESET_NAME);
         this.ruleSets = new HashMap();
 
-        for(int i = 0; i < ruleSetList.getLength(); i++) {
+        for (int i = 0; i < ruleSetList.getLength(); i++) {
             Element node = (Element) ruleSetList.item(i);
-            
+
             RuleSet ruleSet = new RuleSet(node);
             this.ruleSets.put(ruleSet.getLevel(), ruleSet);
         }
-        
+
         NodeList pendingImpactsList = element.getElementsByTagName(XML_PENDINGIMPACT_NAME);
         this.pendingImpacts = new HashMap();
 
-        for(int i = 0; i < pendingImpactsList.getLength(); i++) {
+        for (int i = 0; i < pendingImpactsList.getLength(); i++) {
             Element node = (Element) pendingImpactsList.item(i);
-            
+
             int impact = Integer.parseInt(node.getElementsByTagName(XML_IMPACT_NAME).item(0).getTextContent());
             int delay = Integer.parseInt(node.getElementsByTagName(XML_DELAY_NAME).item(0).getTextContent());
 
             this.pendingImpacts.put(delay, impact);
-        }    
+        }
     }
 
     @Override
@@ -159,6 +160,26 @@ public class Agent implements Cloneable, Serializable{
         return true;
     }
 
+    public boolean isSameState(Agent agent) {
+        if (agent == null) {
+            return false;
+        }
+        if (this.agentId != agent.agentId) {
+            return false;
+        }
+        if (this.keyPart != agent.keyPart) {
+            return false;
+        }
+        if(this.pendingImpacts.entrySet().size() != agent.pendingImpacts.entrySet().size()) return false;
+        for (Entry<Integer, Integer> entrySet : this.pendingImpacts.entrySet()) {
+            Integer key = entrySet.getKey();
+            Integer value = entrySet.getValue();
+            if (!agent.pendingImpacts.containsKey(key)) return false;
+            if (!agent.pendingImpacts.get(key).equals(value)) return false;
+        }
+        return true;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
@@ -175,15 +196,14 @@ public class Agent implements Cloneable, Serializable{
 
     //TODO Revise this algo. 15/07/2015
     /*private int adjustKeyPart(int keyPart) {
-        if (keyPart > this.keyPartRange.getMax()) {
-            keyPart = this.keyPartRange.getMin() + ((keyPart) % this.keyPartRange.getMax());
-        }
-        if (keyPart < this.keyPartRange.getMin()) {
-            keyPart = this.keyPartRange.getMax() - ((keyPart * -1) % Math.abs(this.keyPartRange.getMin()));
-        }
-        return keyPart;
-    }*/
-
+     if (keyPart > this.keyPartRange.getMax()) {
+     keyPart = this.keyPartRange.getMin() + ((keyPart) % this.keyPartRange.getMax());
+     }
+     if (keyPart < this.keyPartRange.getMin()) {
+     keyPart = this.keyPartRange.getMax() - ((keyPart * -1) % Math.abs(this.keyPartRange.getMin()));
+     }
+     return keyPart;
+     }*/
     private void registerImpact(int impact, int delay) {
         if (!this.pendingImpacts.containsKey(delay)) {
             this.pendingImpacts.put(delay, 0);
@@ -194,7 +214,7 @@ public class Agent implements Cloneable, Serializable{
 
     public void sendImpacts(ChaoticSystem system) {
         this.getCurrentRuleSet().getRules().stream().forEach((r) -> {
-                system.getAgents().get(r.getDestination()).registerImpact(r.getImpact(), r.getDelay());
+            system.getAgents().get(r.getDestination()).registerImpact(r.getImpact(), r.getDelay());
         });
 
         this.keyPart += this.getCurrentRuleSet().getSelfImpact();
@@ -241,9 +261,9 @@ public class Agent implements Cloneable, Serializable{
 
         return sb.toString();
     }
-    
+
     public Element serializeXml(Element root) {
-  
+
         Document doc = root.getOwnerDocument();
         Element rootElement = doc.createElement(XML_AGENT_NAME);
 
@@ -258,15 +278,15 @@ public class Agent implements Cloneable, Serializable{
         Element ruleSetElement = doc.createElement(XML_RULESETS_NAME);
         Iterator it = this.ruleSets.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Integer, RuleSet> pair = (Map.Entry)it.next();
+            Map.Entry<Integer, RuleSet> pair = (Map.Entry) it.next();
             ruleSetElement.appendChild(pair.getValue().serializeXml(ruleSetElement));
         }
         rootElement.appendChild(ruleSetElement);
-        
+
         Element pendingImpactsElement = doc.createElement(XML_PENDINGIMPACTS_NAME);
         Iterator pending = this.pendingImpacts.entrySet().iterator();
         while (pending.hasNext()) {
-            Map.Entry<Integer, Integer> pair = (Map.Entry)pending.next();
+            Map.Entry<Integer, Integer> pair = (Map.Entry) pending.next();
             Element pendingImpact = doc.createElement(XML_PENDINGIMPACT_NAME);
             Element impact = doc.createElement(XML_IMPACT_NAME);
             Element delay = doc.createElement(XML_DELAY_NAME);
@@ -275,7 +295,7 @@ public class Agent implements Cloneable, Serializable{
             pendingImpact.appendChild(impact);
             pendingImpact.appendChild(delay);
             pendingImpactsElement.appendChild(pendingImpact);
-        } 
+        }
         rootElement.appendChild(pendingImpactsElement);
 
         return rootElement;

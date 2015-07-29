@@ -322,6 +322,20 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         return true;
     }
     
+    public boolean isSameState(ChaoticSystem otherSystem) {
+        if (otherSystem == null) {
+            return false;
+        }
+        if(this.agents.keySet().size() != otherSystem.agents.entrySet().size()) return false;
+        for (Map.Entry<Integer, Agent> entrySet : agents.entrySet()) {
+            Integer key = entrySet.getKey();
+            Agent agent = entrySet.getValue();
+            if (!otherSystem.agents.containsKey(key)) return false;
+            if (!otherSystem.agents.get(key).isSameState(agent)) return false;
+        }
+        return true;
+    }
+    
     private byte[] generateByteKey(int requiredByteLength) throws KeyGenerationException {
         try {
             this.toGenerateKey = new byte[requiredByteLength];
