@@ -161,21 +161,22 @@ public class Agent implements Cloneable, Serializable {
     }
 
     public boolean isSameState(Agent agent) {
-        if (agent == null) {
+        /*if (agent == null) {
             return false;
-        }
-        if (this.agentId != agent.agentId) {
+        }*/
+        /*if (this.agentId != agent.agentId) {
             return false;
-        }
+        }*/
         if (this.keyPart != agent.keyPart) {
             return false;
         }
-        if(this.pendingImpacts.entrySet().size() != agent.pendingImpacts.entrySet().size()) return false;
-        for (Entry<Integer, Integer> entrySet : this.pendingImpacts.entrySet()) {
-            Integer key = entrySet.getKey();
-            Integer value = entrySet.getValue();
-            if (!agent.pendingImpacts.containsKey(key)) return false;
-            if (!agent.pendingImpacts.get(key).equals(value)) return false;
+        Set<Integer> keys = this.pendingImpacts.keySet();
+        if(keys.size() != agent.pendingImpacts.keySet().size()) return false;
+        for (Integer key : keys) {
+            Integer valueThis = this.pendingImpacts.get(key);
+            Integer valueOther = agent.pendingImpacts.get(key);
+            if(valueOther == null) return false;
+            if(!valueThis.equals(valueOther)) return false;
         }
         return true;
     }
@@ -206,10 +207,11 @@ public class Agent implements Cloneable, Serializable {
      }*/
     private void registerImpact(int impact, int delay) {
         if (!this.pendingImpacts.containsKey(delay)) {
-            this.pendingImpacts.put(delay, 0);
+            this.pendingImpacts.put(delay, impact);
         }
-
-        this.pendingImpacts.put(delay, this.pendingImpacts.get(delay) + impact);
+        else{
+            this.pendingImpacts.put(delay, this.pendingImpacts.get(delay) + impact);
+        } 
     }
 
     public void sendImpacts(ChaoticSystem system) {
@@ -228,6 +230,7 @@ public class Agent implements Cloneable, Serializable {
         if (factor != 0) {
             this.keyPart += Math.floor(maxImpact * Math.sin(this.keyPart * factor));
         }
+        
         HashMap<Integer, Integer> tempImpacts = new HashMap<>();
 
         this.pendingImpacts.entrySet().stream().forEach((i) -> {

@@ -23,6 +23,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     protected byte[] toGenerateKey;
     protected int toGenerateKeyIndex;
     
+    private int impactRangeMax;
     protected Range impactRange;
     protected Range keyPartRange;
     protected Range delayRange;
@@ -50,6 +51,7 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
         this.systemId = systemId;
         
         this.impactRange = impactRange;
+        this.impactRangeMax = impactRange.getMax();
         this.keyPartRange = keyPartRange;
         this.delayRange = delayRange;
         
@@ -59,15 +61,26 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     @Override
     public void evolveSystem(int factor) {
         
+        for(Integer agentID : this.agents.keySet())
+        {
+            Agent a = this.agents.get(agentID);
+            a.sendImpacts(this);
+        }
+        /*
         this.agents.entrySet().stream().forEach((a) -> {
             ((Agent) a.getValue()).sendImpacts(this);
-        });
+        });*/
 
-        this.agents.entrySet().stream().forEach((a) -> {
+        for(Integer agentID : this.agents.keySet())
+        {
+            Agent a = this.agents.get(agentID);
+            a.evolve(factor, this.impactRangeMax);
+        }
+        /*this.agents.entrySet().stream().forEach((a) -> {
             ((Agent) a.getValue()).evolve(factor, this.impactRange.getMax());
-        });
+        });*/
         
-        this.buildKey();
+        this.buildKey();//TODO execute buildKey when first calling getKey????
         this.currentClone = null;
         this.lastGeneratedKeyIndex = 0;
 
@@ -318,15 +331,12 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     
     @Override
     public boolean isSameState(AbstractChaoticSystem other) {
-        if (other == null) return false;
-        if (getClass() != other.getClass()) return false;
         ChaoticSystem otherSystem = (ChaoticSystem)other;
-        if(this.agents.keySet().size() != otherSystem.agents.entrySet().size()) return false;
-        for (Map.Entry<Integer, Agent> entrySet : agents.entrySet()) {
-            Integer key = entrySet.getKey();
-            Agent agent = entrySet.getValue();
-            if (!otherSystem.agents.containsKey(key)) return false;
-            if (!otherSystem.agents.get(key).isSameState(agent)) return false;
+        
+        Set<Integer> agentIDs = this.agents.keySet();
+        for (Integer agentID : agentIDs) {
+            Agent agent = this.agents.get(agentID);
+            if (!otherSystem.agents.get(agentID).isSameState(agent)) return false;
         }
         return true;
     }
