@@ -2,6 +2,7 @@ package com.archosResearch.jCHEKS.chaoticSystem;
 
 import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
+import com.archosResearch.jCHEKS.concept.exception.ChaoticSystemException;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -386,16 +387,24 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
 
     private void evolveClone() {
         try {
-            this.currentClone.evolveSystem();
-        } catch (Exception ex) {
+            try {
+                this.currentClone.evolveSystem();
+            } catch (Exception ex) {
+                Logger.getLogger(ChaoticSystem.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            this.lastGeneratedKey = this.currentClone.getKey();
+            this.lastGeneratedKeyIndex = 0;
+        } catch (ChaoticSystemException ex) {
             Logger.getLogger(ChaoticSystem.class.getName()).log(Level.SEVERE, null, ex);
         }
-        this.lastGeneratedKey = this.currentClone.getKey();
-        this.lastGeneratedKeyIndex = 0;
     }
 
     private void pickCloneKey() {
-        this.lastGeneratedKey = this.currentClone.getKey();
+        try {
+            this.lastGeneratedKey = this.currentClone.getKey();
+        } catch (ChaoticSystemException ex) {
+            Logger.getLogger(ChaoticSystem.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void setClone() throws CloningException {

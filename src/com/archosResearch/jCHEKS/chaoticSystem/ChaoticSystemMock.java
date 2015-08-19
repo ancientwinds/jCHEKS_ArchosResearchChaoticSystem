@@ -1,6 +1,7 @@
 package com.archosResearch.jCHEKS.chaoticSystem;
 
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
+import com.archosResearch.jCHEKS.concept.exception.ChaoticSystemException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,14 +42,18 @@ public class ChaoticSystemMock extends AbstractChaoticSystem {
         ChaoticSystemMock clone = this.cloneSystem();
         
         do {
-            byte[] keyPart = clone.getKey();
-          
-            fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
-            System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
-                
             try {
-                clone.evolveSystem();
-            } catch (Exception ex) {
+                byte[] keyPart = clone.getKey();
+                
+                fullKey = Arrays.copyOf(fullKey, fullKey.length + keyPart.length);
+                System.arraycopy(keyPart, 0, fullKey, fullKey.length-keyPart.length, keyPart.length);
+                
+                try {
+                    clone.evolveSystem();
+                } catch (Exception ex) {
+                    Logger.getLogger(ChaoticSystemMock.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (ChaoticSystemException ex) {
                 Logger.getLogger(ChaoticSystemMock.class.getName()).log(Level.SEVERE, null, ex);
             }
         } while (fullKey.length < requiredLength);
