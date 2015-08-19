@@ -4,6 +4,8 @@ import com.archosResearch.jCHEKS.chaoticSystem.exception.*;
 import com.archosResearch.jCHEKS.concept.chaoticSystem.AbstractChaoticSystem;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import org.xml.sax.InputSource;
@@ -383,7 +385,11 @@ public class ChaoticSystem extends AbstractChaoticSystem implements Cloneable {
     }
 
     private void evolveClone() {
-        this.currentClone.evolveSystem();
+        try {
+            this.currentClone.evolveSystem();
+        } catch (Exception ex) {
+            Logger.getLogger(ChaoticSystem.class.getName()).log(Level.SEVERE, null, ex);
+        }
         this.lastGeneratedKey = this.currentClone.getKey();
         this.lastGeneratedKeyIndex = 0;
     }
